@@ -1,3 +1,4 @@
+
 # CC Ops — Corpus Christi STR Portfolio Operations Platform
 
 > Full-stack operations platform for managing short-term rental, lawn care, and cleaning businesses.
@@ -63,11 +64,12 @@ cd apps/api-node && npm run dev
 
 ### 6. Open the dashboard
 
-Navigate to [http://localhost:3000](http://localhost:3000)
+Navigate to <http://localhost:3000>
 
 ## What's Included
 
 ### ✅ Built
+
 - **Database schema** — Full Prisma schema covering all 3 LLCs (STR, Lawn, Cleaning)
 - **Pricing engine** — FastAPI service with Corpus Christi-specific seasonal, event, and occupancy-based pricing
 - **Dashboard** — Next.js 14 app with sidebar navigation, stats cards, LLC overview
@@ -75,6 +77,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **Seed data** — Sample properties, bookings, cleaners, crews, jobs, and expenses
 
 ### 🚧 Next (build in this order)
+
 1. **Properties CRUD** — Add/edit/delete properties with photos
 2. **Bookings management** — Calendar view, Airbnb/VRBO sync
 3. **Cleaning scheduler** — Dispatch, checklists, photo verification
@@ -87,7 +90,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 ## Tech Stack
 
 | Layer | Tech |
-|---|---|
+| --- | --- |
 | Frontend | Next.js 14, React 18, Tailwind CSS |
 | API (data) | Express.js + TypeScript |
 | API (pricing) | FastAPI + Python |
@@ -109,4 +112,10 @@ Each LLC has its own P&L tracking, with a consolidated view that eliminates inte
 
 ## License
 
-MIT
+# MIT
+
+# CC-dynamic-pricing
+
+dynamic pricing for short term rental homes in Corpus Christi, TX
+
+> > > > > > > 70fe07270c8df937ebad8f5f81485d61a2f96069
