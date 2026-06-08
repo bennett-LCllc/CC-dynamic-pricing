@@ -1,0 +1,654 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// STR Properties
+// ============================================================
+
+model Property {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  address       String
+  city          String   @default("Corpus Christi")
+  state         String   @default("TX")
+  zipCode       String
+  latitude      Decimal? @db.Decimal(10, 7)
+  longitude     Decimal? @db.Decimal(10, 7)
+
+  type          PropertyType @default(HOUSE)
+  bedrooms      Int
+  bathrooms     Decimal     @default(1) @db.Decimal(3, 1)
+  maxGuests     Int
+  squareFeet    Int?
+  lotSizeSqFt   Int?
+  yearBuilt     Int?
+  description   String?
+  amenities     String[]    @default([])
+
+  // STR config
+  baseRate      Decimal     @db.Decimal(8, 2)
+  cleaningFee   Decimal     @default(0) @db.Decimal(8, 2)
+  petFee        Decimal     @default(0) @db.Decimal(8, 2)
+  isPetFriendly Boolean     @default(false)
+  hasPool       Boolean     @default(false)
+  hasHotTub     Boolean     @default(false)
+  isBeachfront  Boolean     @default(false)
+
+  // Status
+  status        PropertyStatus @default(ACTIVE)
+  listingUrlAirbnb String?
+  listingUrlVrbo   String?
+
+  // Relations
+  bookings      Booking[]
+  cleaningJobs  CleaningJob[]
+  lawnJobs      LawnJob[]
+  expenses      Expense[]
+  photos        PropertyPhoto[]
+  pricingRules  PricingRule[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([zipCode])
+  @@index([status])
+}
+
+model PropertyPhoto {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url         String
+  caption     String?
+  category    PhotoCategory @default(EXTERIOR)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// ============================================================
+// Bookings
+// ============================================================
+
+model Booking {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+
+  platform    Platform
+  platformBookingId String?
+
+  guestName   String
+  guestEmail  String?
+  guestPhone  String?
+  guestCount  Int      @default(1)
+  petCount    Int      @default(0)
+
+  checkIn     DateTime @db.Date
+  checkOut    DateTime @db.Date
+  checkInTime String   @default("16:00")
+  checkoutTime String  @default("11:00")
+
+  nightlyRate  Decimal @db.Decimal(8, 2)
+  totalNights  Int
+  subtotal     Decimal @db.Decimal(8, 2)
+  cleaningFee  Decimal @default(0) @db.Decimal(8, 2)
+  petFee       Decimal @default(0) @db.Decimal(8, 2)
+  platformFee  Decimal @default(0) @db.Decimal(8, 2)
+  totalAmount  Decimal @db.Decimal(8, 2)
+
+  status      BookingStatus @default(CONFIRMED)
+  source      BookingSource @default(DIRECT)
+
+  // Relations
+  messages    Message[]
+  cleaningJobs CleaningJob[]
+  pricingSnapshots PricingSnapshot[]
+
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId, checkIn, checkOut])
+  @@index([status])
+  @@index([platformBookingId])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  direction   MessageDirection
+  channel     MessageChannel @default(AIRBNB)
+  content     String
+  sentAt      DateTime @default(now())
+  deliveredAt DateTime?
+  readAt      DateTime?
+  templateId  String?
+  automated   Boolean  @default(false)
+
+  @@index([bookingId, sentAt])
+}
+
+// ============================================================
+// Pricing Engine
+// ============================================================
+
+model PricingRule {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  type        PricingRuleType
+  name        String
+  description String?
+
+  // Conditions
+  startDate   DateTime? @db.Date
+  endDate     DateTime? @db.Date
+  dayOfWeek   Int[]     @default([])  // 0=Sun, 6=Sat
+  minNights   Int?
+
+  // Adjustment
+  adjustmentType  AdjustmentType @default(PERCENTAGE)
+  adjustmentValue Decimal        @default(0) @db.Decimal(6, 2)  // +20% = 20.00, -$15 = -15.00
+
+  priority    Int      @default(0)  // higher = evaluated first
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId, isActive])
+}
+
+model PricingSnapshot {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  rate        Decimal  @db.Decimal(8, 2)
+  factors     Json     // { seasonal: 1.2, dow: 1.15, event: 1.0, ... }
+  createdAt   DateTime @default(now())
+}
+
+// ============================================================
+// Cleaning Business
+// ============================================================
+
+model Cleaner {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  hourlyRate  Decimal  @default(18) @db.Decimal(6, 2)
+  isActive    Boolean  @default(true)
+  notes       String?
+  jobs        CleaningJob[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CleaningJob {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  bookingId   String?
+  booking     Booking? @relation(fields: [bookingId], references: [id])
+
+  // Customer (for external clients outside your STR portfolio)
+  externalCustomerId String?
+
+  scheduledStart DateTime
+  scheduledEnd   DateTime
+  actualStart    DateTime?
+  actualEnd      DateTime?
+
+  cleanerId   String
+  cleaner     Cleaner  @relation(fields: [cleanerId], references: [id])
+
+  cleaningType CleaningType @default(TURNOVER)
+  status      JobStatus    @default(PENDING)
+  bedrooms    Int?
+  bathrooms   Decimal?     @db.Decimal(3, 1)
+  squareFeet  Int?
+
+  // Financial
+  customerCharge Decimal @db.Decimal(8, 2)
+  laborCost      Decimal @default(0) @db.Decimal(8, 2)
+  supplyCost     Decimal @default(0) @db.Decimal(8, 2)
+  travelCost     Decimal @default(0) @db.Decimal(8, 2)
+
+  // Quality
+  checklist      CleaningChecklist?
+  photos         CleaningPhoto[]
+  hostRating     Int?        // 1-5, if host reviews the cleaning
+  hostFeedback   String?
+  issueReported  Boolean     @default(false)
+  issueNotes     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([scheduledStart, status])
+  @@index([cleanerId, scheduledStart])
+  @@index([propertyId])
+}
+
+model CleaningChecklist {
+  id          String   @id @default(cuid())
+  jobId       String   @unique
+  job         CleaningJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  // Room-level tasks (stored as JSON for flexibility)
+  tasks       Json     // { "kitchen": [...], "bathroom": [...], "bedroom": [...], ... }
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model CleaningPhoto {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         CleaningJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  url         String
+  category    PhotoCategory
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// ============================================================
+// Lawn Care Business
+// ============================================================
+
+model LawnCrew {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  hourlyRate  Decimal  @default(16) @db.Decimal(6, 2)
+  isActive    Boolean  @default(true)
+  jobs        LawnJob[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LawnJob {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+
+  // Customer (for external clients)
+  externalCustomerId String?
+
+  scheduledDate   DateTime @db.Date
+  scheduledTime   String?  // "08:00"
+  completedAt     DateTime?
+
+  crewId      String
+  crew        LawnCrew @relation(fields: [crewId], references: [id])
+
+  serviceType ServiceType @default(MOW)
+  status      JobStatus   @default(PENDING)
+
+  // Property details
+  lotSize     LotSize     @default(QUARTER_ACRE)
+  notes       String?
+
+  // Financial
+  customerCharge Decimal @db.Decimal(8, 2)
+  laborCost      Decimal @default(0) @db.Decimal(8, 2)
+  materialCost   Decimal @default(0) @db.Decimal(8, 2)
+
+  // Quality
+  photos         LawnPhoto[]
+  hostFeedback   String?
+  issueReported  Boolean  @default(false)
+  issueNotes     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([scheduledDate, status])
+  @@index([crewId, scheduledDate])
+  @@index([propertyId])
+}
+
+model LawnPhoto {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         LawnJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  url         String
+  photoType   LawnPhotoType @default(AFTER)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// ============================================================
+// External Customers (for Lawn & Cleaning)
+// ============================================================
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String
+  company     String?
+  type        CustomerType @default(STR_OWNER)
+  status      CustomerStatus @default(ACTIVE)
+
+  // For STR owners who have their own properties
+  properties  CustomerProperty[]
+
+  lawnJobs ExternalLawnJob[]
+  cleaningJobs ExternalCleaningJob[]
+
+  stripeCustomerId String?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, status])
+}
+
+model CustomerProperty {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  name        String?
+  address     String
+  zipCode     String
+  propertyType PropertyType @default(HOUSE)
+  bedrooms    Int?
+  bathrooms   Decimal?  @db.Decimal(3, 1)
+  squareFeet  Int?
+  lotSize     LotSize   @default(QUARTER_ACRE)
+  isActive    Boolean   @default(true)
+
+  // Packages
+  lawnPackage  LawnPackage?
+  cleaningPackage CleaningFrequency?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Helper tables for external customer jobs (separate from internal)
+model ExternalLawnJob {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  propertyAddress String
+  scheduledDate   DateTime @db.Date
+  completedAt     DateTime?
+  crewId          String?
+  serviceType     ServiceType @default(MOW)
+  status          JobStatus   @default(PENDING)
+  customerCharge  Decimal     @db.Decimal(8, 2)
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model ExternalCleaningJob {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  propertyAddress String
+  scheduledStart  DateTime
+  completedAt     DateTime?
+  cleanerId       String?
+  cleaningType    CleaningType @default(TURNOVER)
+  status          JobStatus    @default(PENDING)
+  customerCharge  Decimal      @db.Decimal(8, 2)
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// Expenses & Accounting
+// ============================================================
+
+model Expense {
+  id          String   @id @default(cuid())
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+
+  category    ExpenseCategory
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  date        DateTime @db.Date
+
+  // LLC tracking
+  incurredBy  LLC @default(STR)
+  paidFrom    String?  // bank account reference
+
+  // Receipt/documentation
+  receiptUrl  String?
+  vendor      String?
+
+  isRecurring Boolean  @default(false)
+  recurringInterval RecurringInterval?
+
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId, date])
+  @@index([category])
+  @@index([incurredBy])
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum PropertyType {
+  HOUSE
+  CONDO
+  TOWNHOUSE
+  DUPLEX
+  TRIPLEX
+  APARTMENT
+  CABIN
+}
+
+enum PropertyStatus {
+  ACTIVE
+  INACTIVE
+  UNDER_RENOVATION
+  SOLD
+}
+
+enum Platform {
+  AIRBNB
+  VRBO
+  BOOKING_COM
+  DIRECT
+}
+
+enum BookingStatus {
+  INQUIRY
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum BookingSource {
+  AIRBNB
+  VRBO
+  BOOKING_COM
+  DIRECT
+  REFERRAL
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageChannel {
+  AIRBNB
+  VRBO
+  SMS
+  EMAIL
+  PHONE
+}
+
+enum PricingRuleType {
+  SEASONAL
+  DAY_OF_WEEK
+  EVENT
+  MIN_STAY
+  LAST_MINUTE
+  EARLY_BIRD
+  CUSTOM
+}
+
+enum AdjustmentType {
+  PERCENTAGE
+  FIXED
+  FLAT_RATE
+}
+
+enum PhotoCategory {
+  EXTERIOR
+  INTERIOR
+  KITCHEN
+  BATHROOM
+  BEDROOM
+  LIVING_ROOM
+  POOL
+  YARD
+  DAMAGE
+  BEFORE_AFTER
+  OTHER
+}
+
+enum CleaningType {
+  TURNOVER
+  DEEP_CLEAN
+  MOVE_IN_OUT
+  MID_STAY
+  POST_CONSTRUCTION
+}
+
+enum ServiceType {
+  MOW
+  EDGE
+  TRIM
+  FERTILIZE
+  WEED_CONTROL
+  AERATE
+  OVERSEED
+  LEAF_REMOVAL
+  PRESSURE_WASH
+  FULL_SERVICE
+}
+
+enum LotSize {
+  EIGHTH_ACRE    // ~5,445 sq ft
+  QUARTER_ACRE   // ~10,890 sq ft
+  HALF_ACRE      // ~21,780 sq ft
+  ACRE           // ~43,560 sq ft
+  LARGE          // 1+ acres
+  COMMERCIAL
+}
+
+enum LawnPhotoType {
+  BEFORE
+  AFTER
+}
+
+enum JobStatus {
+  PENDING
+  SCHEDULED
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ISSUE_REPORTED
+  QUALITY_CHECK
+}
+
+enum CustomerType {
+  STR_OWNER
+  PM_COMPANY
+  RESIDENTIAL
+  COMMERCIAL
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  CHURNED
+}
+
+enum LawnPackage {
+  BASIC         // mow + edge only
+  STANDARD      // mow + edge + blow
+  PREMIUM       // standard + trim + fertilizer
+  SHOWCASE      // premium + monthly landscaping
+}
+
+enum CleaningFrequency {
+  PER_TURNOVER
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum ExpenseCategory {
+  MORTGAGE
+  INSURANCE
+  PROPERTY_TAX
+  UTILITIES
+  INTERNET
+  WATER
+  ELECTRIC
+  GAS
+  TRASH
+  HOA
+  MAINTENANCE
+  REPAIRS
+  SUPPLIES
+  FURNISHING
+  LINENS
+  CLEANING_SUPPLIES
+  LAWN_SUPPLIES
+  EQUIPMENT
+  SOFTWARE
+  MARKETING
+  PLATFORM_FEES
+  LEGAL
+  ACCOUNTING
+  TRAVEL
+  FUEL
+  LABOR
+  OTHER
+}
+
+enum RecurringInterval {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+}
+
+enum LLC {
+  STR
+  LAWN
+  CLEANING
+}
