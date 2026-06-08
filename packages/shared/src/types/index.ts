@@ -104,6 +104,66 @@ export interface CreatePropertyInput {
 
 export type UpdatePropertyInput = Partial<CreatePropertyInput>;
 
+export interface Booking {
+  id: string;
+  propertyId: string;
+  property?: PropertySummary | null;
+  platform: Platform;
+  platformBookingId?: string | null;
+  guestName: string;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
+  guestCount: number;
+  petCount: number;
+  checkIn: string;
+  checkOut: string;
+  checkInTime: string;
+  checkoutTime: string;
+  nightlyRate: number;
+  totalNights: number;
+  subtotal: number;
+  cleaningFee: number;
+  petFee: number;
+  platformFee: number;
+  totalAmount: number;
+  status: BookingStatus;
+  source: BookingSource;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBookingInput {
+  propertyId: string;
+  platform?: Platform;
+  platformBookingId?: string;
+  guestName: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  guestCount?: number;
+  petCount?: number;
+  checkIn: string;
+  checkOut: string;
+  checkInTime?: string;
+  checkoutTime?: string;
+  nightlyRate: number;
+  totalNights?: number;
+  subtotal?: number;
+  cleaningFee?: number;
+  petFee?: number;
+  platformFee?: number;
+  totalAmount?: number;
+  status?: BookingStatus;
+  source?: BookingSource;
+  notes?: string;
+}
+
+export type UpdateBookingInput = Partial<CreateBookingInput>;
+
+export type Platform = 'AIRBNB' | 'VRBO' | 'BOOKING_COM' | 'DIRECT';
+export type BookingStatus = 'INQUIRY' | 'CONFIRMED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+export type BookingSource = 'AIRBNB' | 'VRBO' | 'BOOKING_COM' | 'DIRECT' | 'REFERRAL';
+
 export interface PropertySummary {
   id: string;
   name: string;

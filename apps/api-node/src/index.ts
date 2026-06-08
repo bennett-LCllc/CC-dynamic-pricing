@@ -11,6 +11,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import propertyRoutes from './routes/properties';
 import dashboardRoutes from './routes/dashboard';
+import bookingRoutes from './routes/bookings';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,9 +29,7 @@ app.get('/health', (_req, res) => {
 // Routes
 app.use('/api/properties', propertyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
-// Future routes:
-// app.use('/api/bookings', bookingRoutes);
+app.use('/api/bookings', bookingRoutes);
 // app.use('/api/cleaning', cleaningRoutes);
 // app.use('/api/lawn', lawnRoutes);
 // app.use('/api/customers', customerRoutes);
