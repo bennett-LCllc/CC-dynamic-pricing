@@ -15,16 +15,16 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 
-const navItems = [
-  { href: '/', label: 'Dashboard', icon: Home },
-  { href: '/properties', label: 'Properties', icon: Building2 },
-  { href: '/bookings', label: 'Bookings', icon: CalendarDays },
-  { href: '/pricing', label: 'Pricing', icon: DollarSign },
-  { href: '/cleaning', label: 'Cleaning', icon: Sparkles },
-  { href: '/lawn', label: 'Lawn Care', icon: TreePine },
-  { href: '/financials', label: 'Financials', icon: BarChart3 },
-  { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/settings', label: 'Settings', icon: Settings },
+const navItems: Array<{ href: `/`; label: string; icon: React.ComponentType<{ className?: string }> } | { href: `/${string}`; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { href: '/' as const, label: 'Dashboard', icon: Home },
+  { href: '/properties' as const, label: 'Properties', icon: Building2 },
+  { href: '/bookings' as const, label: 'Bookings', icon: CalendarDays },
+  { href: '/pricing' as const, label: 'Pricing', icon: DollarSign },
+  { href: '/cleaning' as const, label: 'Cleaning', icon: Sparkles },
+  { href: '/lawn' as const, label: 'Lawn Care', icon: TreePine },
+  { href: '/financials' as const, label: 'Financials', icon: BarChart3 },
+  { href: '/messages' as const, label: 'Messages', icon: MessageSquare },
+  { href: '/settings' as const, label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar() {

@@ -1,44 +1,49 @@
 'use client';
 
 import { Building2, TreePine, Sparkles } from 'lucide-react';
+import type { DashboardData } from '@/lib/api';
 
-const llcs = [
-  {
-    name: 'STR LLC',
-    icon: Building2,
-    color: 'text-ocean-500',
-    bgColor: 'bg-ocean-50',
-    stats: [
-      { label: 'Units', value: '0 / 15' },
-      { label: 'Revenue MTD', value: '$0' },
-      { label: 'Occupancy', value: '—' },
-    ],
-  },
-  {
-    name: 'Lawn LLC',
-    icon: TreePine,
-    color: 'text-palm-500',
-    bgColor: 'bg-palm-50',
-    stats: [
-      { label: 'Clients', value: '0 / 45' },
-      { label: 'Revenue MTD', value: '$0' },
-      { label: 'Jobs Today', value: '0' },
-    ],
-  },
-  {
-    name: 'Cleaning LLC',
-    icon: Sparkles,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-50',
-    stats: [
-      { label: 'Clients', value: '0 / 50' },
-      { label: 'Revenue MTD', value: '$0' },
-      { label: 'Turnovers Today', value: '0' },
-    ],
-  },
-];
+interface LLCSummaryProps {
+  data: DashboardData;
+}
 
-export function LLCSummary() {
+export function LLCSummary({ data }: LLCSummaryProps) {
+  const llcs = [
+    {
+      name: 'STR LLC',
+      icon: Building2,
+      color: 'text-ocean-500',
+      bgColor: 'bg-ocean-50',
+      stats: [
+        { label: 'Units', value: data.llcs.str.units },
+        { label: 'Revenue MTD', value: `$${data.llcs.str.mtdRevenue.toLocaleString()}` },
+        { label: 'Occupancy', value: data.llcs.str.occupancy },
+      ],
+    },
+    {
+      name: 'Lawn LLC',
+      icon: TreePine,
+      color: 'text-palm-500',
+      bgColor: 'bg-palm-50',
+      stats: [
+        { label: 'Clients', value: data.llcs.lawn.clients },
+        { label: 'Jobs Today', value: String(data.llcs.lawn.jobsToday) },
+        { label: 'MTD Costs', value: `$${data.expenses.lawn.toLocaleString()}` },
+      ],
+    },
+    {
+      name: 'Cleaning LLC',
+      icon: Sparkles,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50',
+      stats: [
+        { label: 'Clients', value: data.llcs.cleaning.clients },
+        { label: 'Turnovers Today', value: String(data.llcs.cleaning.turnoversToday) },
+        { label: 'MTD Costs', value: `$${data.expenses.cleaning.toLocaleString()}` },
+      ],
+    },
+  ];
+
   return (
     <div className="card p-5">
       <h3 className="text-lg font-semibold mb-4">LLC Overview</h3>

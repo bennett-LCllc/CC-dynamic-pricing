@@ -109,3 +109,72 @@ export async function deleteProperty(id: string): Promise<void> {
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
 }
+
+// ============================================================
+// Dashboard
+// ============================================================
+
+export interface DashboardData {
+  properties: {
+    total: number;
+    active: number;
+    inactive: number;
+    occupancyRate: number;
+  };
+  today: {
+    checkIns: number;
+    checkOuts: number;
+    cleaningScheduled: number;
+    cleaningCompleted: number;
+    lawnScheduled: number;
+    lawnCompleted: number;
+  };
+  revenue: {
+    mtd: number;
+    projectedMonthly: number;
+  };
+  upcomingBookings: number;
+  llcs: {
+    str: { units: string; mtdRevenue: number; occupancy: string };
+    lawn: { clients: string; mtdRevenue: number; jobsToday: number };
+    cleaning: { clients: string; mtdRevenue: number; turnoversToday: number };
+  };
+  expenses: {
+    str: number;
+    lawn: number;
+    cleaning: number;
+  };
+  recentActivity: {
+    bookings: Array<{
+      id: string;
+      type: string;
+      title: string;
+      property: string;
+      date: string;
+      status: string;
+      amount: number;
+    }>;
+    cleaningJobs: Array<{
+      id: string;
+      type: string;
+      title: string;
+      property: string;
+      date: string;
+      status: string;
+    }>;
+  };
+  alerts: Array<{
+    id: string;
+    type: 'info' | 'warning' | 'critical';
+    title: string;
+    description: string;
+    propertyName?: string;
+  }>;
+}
+
+export async function getDashboardOverview(): Promise<DashboardData> {
+  const res = await fetch(`${API_URL}/api/dashboard/overview`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}

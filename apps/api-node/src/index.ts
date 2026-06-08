@@ -10,6 +10,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import propertyRoutes from './routes/properties';
+import dashboardRoutes from './routes/dashboard';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -26,6 +27,7 @@ app.get('/health', (_req, res) => {
 
 // Routes
 app.use('/api/properties', propertyRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Future routes:
 // app.use('/api/bookings', bookingRoutes);
