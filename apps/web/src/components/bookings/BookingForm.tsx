@@ -138,8 +138,8 @@ export default function BookingForm({
         await createBooking(form);
       }
       onSaved();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save booking');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save booking');
     } finally {
       setLoading(false);
     }

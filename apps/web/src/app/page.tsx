@@ -9,7 +9,7 @@ import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { LLCSummary } from '@/components/dashboard/LLCSummary';
 import { getDashboardOverview } from '@/lib/api';
 import type { DashboardData } from '@/lib/api';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 function DashboardSkeleton() {
   return (
@@ -70,8 +70,8 @@ export default function DashboardPage() {
       try {
         const dashboardData = await getDashboardOverview();
         setData(dashboardData);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load dashboard');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard');
       } finally {
         setLoading(false);
       }

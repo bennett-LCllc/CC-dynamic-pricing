@@ -12,6 +12,9 @@ import helmet from 'helmet';
 import propertyRoutes from './routes/properties';
 import dashboardRoutes from './routes/dashboard';
 import bookingRoutes from './routes/bookings';
+import cleaningRoutes from './routes/cleaning';
+import lawnRoutes from './routes/lawn';
+import financialsRoutes from './routes/financials';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -30,8 +33,9 @@ app.get('/health', (_req, res) => {
 app.use('/api/properties', propertyRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/bookings', bookingRoutes);
-// app.use('/api/cleaning', cleaningRoutes);
-// app.use('/api/lawn', lawnRoutes);
+app.use('/api/cleaning', cleaningRoutes);
+app.use('/api/lawn', lawnRoutes);
+app.use('/api/financials', financialsRoutes);
 // app.use('/api/customers', customerRoutes);
 // app.use('/api/messages', messageRoutes);
 // app.use('/api/expenses', expenseRoutes);

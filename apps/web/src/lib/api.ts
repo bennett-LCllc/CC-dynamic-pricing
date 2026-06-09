@@ -14,6 +14,25 @@ import type {
   Booking,
   CreateBookingInput,
   UpdateBookingInput,
+  CleaningJob,
+  CleaningJobSummary,
+  CreateCleaningJobInput,
+  UpdateCleaningJobInput,
+  CleaningJobFilters,
+  CleaningChecklist,
+  Cleaner,
+  LawnJob,
+  LawnJobSummary,
+  CreateLawnJobInput,
+  UpdateLawnJobInput,
+  LawnJobFilters,
+  LawnCrew,
+  Expense,
+  CreateExpenseInput,
+  UpdateExpenseInput,
+  ExpenseFilters,
+  FinancialOverview,
+  ExpenseBreakdown,
 } from '@cc-ops/shared';
 
 export async function calculateRate(params: {
@@ -259,4 +278,239 @@ export async function deleteBooking(id: string): Promise<Booking> {
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
+}
+
+// ============================================================
+// Cleaning CRUD
+// ============================================================
+
+export async function getCleaningJobs(filters?: CleaningJobFilters): Promise<CleaningJobSummary[]> {
+  const sp = new URLSearchParams();
+  if (filters?.statuses?.length) sp.set('statuses', filters.statuses.join(','));
+  if (filters?.propertyId) sp.set('propertyId', filters.propertyId);
+  if (filters?.cleanerId) sp.set('cleanerId', filters.cleanerId);
+  if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
+  if (filters?.toDate) sp.set('toDate', filters.toDate);
+  const qs = sp.toString();
+  const res = await fetch(`${API_URL}/api/cleaning/jobs${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getCleaningJob(id: string): Promise<CleaningJob> {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function createCleaningJob(data: CreateCleaningJobInput): Promise<CleaningJob> {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateCleaningJob(id: string, data: UpdateCleaningJobInput): Promise<CleaningJob> {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteCleaningJob(id: string): Promise<CleaningJob> {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function submitCleaningChecklist(jobId: string, tasks: Record<string, boolean>): Promise<CleaningChecklist> {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/checklist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(tasks),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function addCleaningPhoto(jobId: string, data: { url: string; category?: string; sortOrder?: number }) {
+  const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/photos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getCleaners(): Promise<Cleaner[]> {
+  const res = await fetch(`${API_URL}/api/cleaning/cleaners`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+// ============================================================
+// Lawn CRUD
+// ============================================================
+
+export async function getLawnJobs(filters?: LawnJobFilters): Promise<LawnJob[]> {
+  const sp = new URLSearchParams();
+  if (filters?.statuses?.length) sp.set('statuses', filters.statuses.join(','));
+  if (filters?.propertyId) sp.set('propertyId', filters.propertyId);
+  if (filters?.crewId) sp.set('crewId', filters.crewId);
+  if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
+  if (filters?.toDate) sp.set('toDate', filters.toDate);
+  const qs = sp.toString();
+  const res = await fetch(`${API_URL}/api/lawn/jobs${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getLawnJob(id: string): Promise<LawnJob> {
+  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function createLawnJob(data: CreateLawnJobInput): Promise<LawnJob> {
+  const res = await fetch(`${API_URL}/api/lawn/jobs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateLawnJob(id: string, data: UpdateLawnJobInput): Promise<LawnJob> {
+  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteLawnJob(id: string): Promise<LawnJob> {
+  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getLawnCrews(): Promise<LawnCrew[]> {
+  const res = await fetch(`${API_URL}/api/lawn/crews`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+// ============================================================
+// Financials
+// ============================================================
+
+export async function getFinancialOverview(): Promise<FinancialOverview> {
+  const res = await fetch(`${API_URL}/api/financials/overview`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getLLCFinancials(
+  type: 'STR' | 'LAWN' | 'CLEANING'
+): Promise<{ revenue: number; expenses: number; netIncome: number }> {
+  const res = await fetch(`${API_URL}/api/financials/llc/${type}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getExpenses(filters?: ExpenseFilters): Promise<Expense[]> {
+  const sp = new URLSearchParams();
+  if (filters?.propertyId) sp.set('propertyId', filters.propertyId);
+  if (filters?.category) sp.set('category', filters.category);
+  if (filters?.incurredBy) sp.set('incurredBy', filters.incurredBy);
+  if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
+  if (filters?.toDate) sp.set('toDate', filters.toDate);
+  const qs = sp.toString();
+  const res = await fetch(`${API_URL}/api/financials/expenses${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function createExpense(data: CreateExpenseInput): Promise<Expense> {
+  const res = await fetch(`${API_URL}/api/financials/expenses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateExpense(id: string, data: UpdateExpenseInput): Promise<Expense> {
+  const res = await fetch(`${API_URL}/api/financials/expenses/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteExpense(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/financials/expenses/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
 }

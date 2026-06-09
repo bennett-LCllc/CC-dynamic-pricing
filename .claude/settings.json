@@ -10,5 +10,29 @@
       "mcp__codegraph__codegraph_files",
       "mcp__codegraph__codegraph_status"
     ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/michael.bennett@cognitedata.com/corpus-christi-ops/.claude/hooks/bridge-check.py UserPromptSubmit",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/michael.bennett@cognitedata.com/corpus-christi-ops/.claude/hooks/bridge-check.py Stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

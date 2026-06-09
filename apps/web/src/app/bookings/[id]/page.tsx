@@ -11,52 +11,8 @@ import {
   Calendar, DollarSign, Bed, PawPrint, Clock, Loader2,
   AlertTriangle, CheckCircle2,
 } from 'lucide-react';
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    INQUIRY: 'badge-info',
-    CONFIRMED: 'badge-success',
-    ACTIVE: 'badge-success',
-    COMPLETED: 'bg-muted text-muted-foreground',
-    CANCELLED: 'badge-danger',
-    NO_SHOW: 'badge-warning',
-  };
-  const labels: Record<string, string> = {
-    INQUIRY: 'Inquiry',
-    CONFIRMED: 'Confirmed',
-    ACTIVE: 'Active',
-    COMPLETED: 'Completed',
-    CANCELLED: 'Cancelled',
-    NO_SHOW: 'No Show',
-  };
-  return (
-    <span className={`badge ${styles[status] ?? 'badge-info'}`}>
-      {labels[status] ?? status}
-    </span>
-  );
-}
-
-function PlatformBadge({ platform }: { platform: string }) {
-  const styles: Record<string, string> = {
-    AIRBNB: 'bg-pink-100 text-pink-700',
-    VRBO: 'bg-blue-100 text-blue-700',
-    BOOKING_COM: 'bg-indigo-100 text-indigo-700',
-    DIRECT: 'bg-palm-100 text-palm-700',
-  };
-  const labels: Record<string, string> = {
-    AIRBNB: 'Airbnb',
-    VRBO: 'VRBO',
-    BOOKING_COM: 'Booking.com',
-    DIRECT: 'Direct',
-  };
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[platform] ?? 'bg-muted text-muted-foreground'}`}
-    >
-      {labels[platform] ?? platform}
-    </span>
-  );
-}
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { PlatformBadge } from '@/components/shared/PlatformBadge';
 
 export default function BookingDetailPage({
   params,
@@ -79,8 +35,8 @@ export default function BookingDetailPage({
     try {
       const data = await getBooking(id);
       setBooking(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load booking');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load booking');
     } finally {
       setLoading(false);
     }
@@ -95,8 +51,8 @@ export default function BookingDetailPage({
     try {
       await deleteBooking(id);
       router.push('/bookings');
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel booking');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to cancel booking');
       setDeleteLoading(false);
     }
   };

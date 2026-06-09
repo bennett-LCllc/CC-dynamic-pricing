@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 
-const navItems: Array<{ href: `/`; label: string; icon: React.ComponentType<{ className?: string }> } | { href: `/${string}`; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const navItems = [
   { href: '/' as const, label: 'Dashboard', icon: Home },
   { href: '/properties' as const, label: 'Properties', icon: Building2 },
   { href: '/bookings' as const, label: 'Bookings', icon: CalendarDays },
@@ -25,7 +25,7 @@ const navItems: Array<{ href: `/`; label: string; icon: React.ComponentType<{ cl
   { href: '/financials' as const, label: 'Financials', icon: BarChart3 },
   { href: '/messages' as const, label: 'Messages', icon: MessageSquare },
   { href: '/settings' as const, label: 'Settings', icon: Settings },
-];
+] as const;
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -50,7 +50,8 @@ export function Sidebar() {
           return (
             <Link
               key={item.href}
-              href={item.href}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              href={item.href as any}
               className={clsx(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive

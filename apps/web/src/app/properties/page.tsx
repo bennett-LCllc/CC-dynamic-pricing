@@ -8,7 +8,7 @@ import type { PropertyListItem } from '@cc-ops/shared';
 import PropertyForm from '@/components/properties/PropertyForm';
 import {
   Building2, Plus, MapPin, Bed, Bath, Users, DollarSign,
-  TrendingUp, Calendar, Loader2,
+  TrendingUp,
 } from 'lucide-react';
 
 function StatusBadge({ status }: { status: string }) {
@@ -112,8 +112,8 @@ export default function PropertiesPage() {
     try {
       const data = await getProperties();
       setProperties(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load properties');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load properties');
     } finally {
       setLoading(false);
     }

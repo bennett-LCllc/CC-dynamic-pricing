@@ -11,22 +11,7 @@ import {
   Calendar, TrendingUp, Loader2, AlertTriangle, CheckCircle2,
   Wifi, Waves, Car, Flame, PawPrint, Eye,
 } from 'lucide-react';
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    ACTIVE: 'badge-success',
-    INACTIVE: 'badge-warning',
-    UNDER_RENOVATION: 'badge-info',
-    SOLD: 'badge-danger',
-  };
-  const labels: Record<string, string> = {
-    ACTIVE: 'Active',
-    INACTIVE: 'Inactive',
-    UNDER_RENOVATION: 'Under Renovation',
-    SOLD: 'Sold',
-  };
-  return <span className={`badge ${styles[status] ?? 'badge-info'}`}>{labels[status] ?? status}</span>;
-}
+import { StatusBadge } from '@/components/shared/StatusBadge';
 
 type Tab = 'overview' | 'bookings' | 'financials' | 'settings';
 
@@ -48,8 +33,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     try {
       const data = await getProperty(id);
       setProperty(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load property');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load property');
     } finally {
       setLoading(false);
     }
@@ -64,8 +49,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     try {
       await deleteProperty(id);
       router.push('/properties');
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete property');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete property');
       setDeleteLoading(false);
     }
   };
@@ -276,6 +261,37 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                       <span key={a} className="px-2.5 py-1 bg-muted rounded-full text-xs font-medium">
                         {a}
                       </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Photos */}
+              {property.photos && property.photos.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="text-xs text-muted-foreground mb-3">Photos ({property.photos.length})</div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {property.photos.map((photo) => (
+                      <div key={photo.id} className="group relative">
+                        <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+                          <img
+                            src={photo.url}
+                            alt={photo.caption ?? `Property photo`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.parentElement!.classList.add('flex', 'items-center', 'justify-center');
+                              target.parentElement!.innerHTML = '<span class="text-xs text-muted-foreground">No preview</span>';
+                            }}
+                          />
+                        </div>
+                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 rounded-b-lg">
+                          <div className="text-xs text-white truncate">
+                            {photo.caption || photo.category}
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>

@@ -192,18 +192,107 @@ export interface BookingSummary {
   guestCount: number;
 }
 
+export type CleaningType = 'TURNOVER' | 'DEEP_CLEAN' | 'MOVE_IN_OUT' | 'MID_STAY' | 'POST_CONSTRUCTION';
+export type JobStatus = 'PENDING' | 'SCHEDULED' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'ISSUE_REPORTED' | 'QUALITY_CHECK';
+
 export interface CleaningJobSummary {
   id: string;
-  propertyName: string;
-  address: string;
+  propertyId: string;
+  property?: { id: string; name: string; address?: string | null; slug?: string; zipCode?: string } | null;
+  bookingId?: string | null;
+  booking?: { id: string; guestName: string; checkIn: string; checkOut: string } | null;
   scheduledStart: string;
   scheduledEnd: string;
-  cleaningType: 'TURNOVER' | 'DEEP_CLEAN' | 'MOVE_IN_OUT' | 'MID_STAY';
-  status: 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'ISSUE_REPORTED';
-  cleanerName: string;
-  customerCharge: number;
-  hasPhotos: boolean;
-  issueReported: boolean;
+  cleaningType: CleaningType;
+  status: JobStatus;
+  cleanerId?: string | null;
+  cleaner?: { id: string; name: string; phone?: string | null } | null;
+  customerCharge?: number | string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CleaningJob {
+  id: string;
+  propertyId: string;
+  property?: { id: string; name: string; address?: string | null; slug?: string; zipCode?: string } | null;
+  bookingId?: string | null;
+  booking?: { id: string; guestName: string; checkIn: string; checkOut: string } | null;
+  scheduledStart: string;
+  scheduledEnd: string;
+  actualStart?: string | null;
+  actualEnd?: string | null;
+  cleaningType: CleaningType;
+  status: JobStatus;
+  cleanerId?: string | null;
+  cleaner?: { id: string; name: string; phone?: string | null } | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  squareFeet?: number | null;
+  customerCharge?: number | string | null;
+  laborCost?: number | string | null;
+  supplyCost?: number | string | null;
+  travelCost?: number | string | null;
+  notes?: string | null;
+  checklist?: CleaningChecklist | null;
+  photos?: CleaningPhoto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CleaningChecklist {
+  id: string;
+  jobId: string;
+  tasks: Record<string, boolean>;
+  completedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CleaningPhoto {
+  id: string;
+  jobId: string;
+  url: string;
+  category?: string | null;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface Cleaner {
+  id: string;
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  hourlyRate?: number | string | null;
+  isActive: boolean;
+}
+
+export interface CreateCleaningJobInput {
+  propertyId: string;
+  bookingId?: string;
+  scheduledStart: string;
+  scheduledEnd: string;
+  cleaningType: CleaningType;
+  status?: JobStatus;
+  cleanerId?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  squareFeet?: number;
+  customerCharge?: number;
+  laborCost?: number;
+  supplyCost?: number;
+  travelCost?: number;
+  notes?: string;
+}
+
+export type UpdateCleaningJobInput = Partial<CreateCleaningJobInput>;
+
+export interface CleaningJobFilters {
+  statuses?: string[];
+  propertyId?: string;
+  cleanerId?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface LawnJobSummary {
@@ -215,6 +304,67 @@ export interface LawnJobSummary {
   crewName: string;
   customerCharge: number;
   hasPhotos: boolean;
+}
+
+export interface LawnCrew {
+  id: string;
+  name: string;
+  phone: string | null;
+  hourlyRate: number | null;
+}
+
+export interface LawnPhoto {
+  id: string;
+  jobId: string;
+  url: string;
+  category: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface LawnJob {
+  id: string;
+  propertyId: string;
+  property?: { id: string; name: string; address: string | null; slug: string; zipCode: string } | null;
+  crewId: string | null;
+  crew: LawnCrew | null;
+  scheduledDate: string;
+  scheduledTime: string | null;
+  completedAt: string | null;
+  serviceType: string;
+  lotSize: string | null;
+  status: string;
+  notes: string | null;
+  customerCharge: number | string | null;
+  laborCost: number | string | null;
+  materialCost: number | string | null;
+  photos: LawnPhoto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLawnJobInput {
+  propertyId: string;
+  crewId?: string;
+  scheduledDate: string;
+  scheduledTime?: string;
+  serviceType: string;
+  lotSize?: string;
+  status?: string;
+  customerCharge?: number;
+  laborCost?: number;
+  materialCost?: number;
+  notes?: string;
+}
+
+export type UpdateLawnJobInput = Partial<CreateLawnJobInput>;
+
+export interface LawnJobFilters {
+  statuses?: string[];
+  propertyId?: string;
+  crewId?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 // ============================================================
@@ -264,6 +414,94 @@ export interface ExpenseBreakdown {
   amount: number;
   percentage: number;
   trend: 'up' | 'down' | 'stable';
+}
+
+export type ExpenseCategory =
+  | 'MORTGAGE'
+  | 'INSURANCE'
+  | 'PROPERTY_TAX'
+  | 'UTILITIES'
+  | 'INTERNET'
+  | 'WATER'
+  | 'ELECTRIC'
+  | 'GAS'
+  | 'TRASH'
+  | 'HOA'
+  | 'MAINTENANCE'
+  | 'REPAIRS'
+  | 'SUPPLIES'
+  | 'FURNISHING'
+  | 'LINENS'
+  | 'CLEANING_SUPPLIES'
+  | 'LAWN_SUPPLIES'
+  | 'EQUIPMENT'
+  | 'SOFTWARE'
+  | 'MARKETING'
+  | 'PLATFORM_FEES'
+  | 'LEGAL'
+  | 'ACCOUNTING'
+  | 'TRAVEL'
+  | 'FUEL'
+  | 'LABOR'
+  | 'OTHER';
+
+export type LLC = 'STR' | 'LAWN' | 'CLEANING';
+
+export type RecurringInterval = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
+
+export interface Expense {
+  id: string;
+  propertyId: string | null;
+  property?: { id: string; name: string } | null;
+  category: ExpenseCategory;
+  description: string;
+  amount: number;
+  date: string;
+  incurredBy: LLC;
+  paidFrom: string | null;
+  receiptUrl: string | null;
+  vendor: string | null;
+  isRecurring: boolean;
+  recurringInterval: RecurringInterval | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateExpenseInput {
+  propertyId?: string;
+  category: ExpenseCategory;
+  description: string;
+  amount: number;
+  date: string;
+  incurredBy?: LLC;
+  paidFrom?: string;
+  receiptUrl?: string;
+  vendor?: string;
+  isRecurring?: boolean;
+  recurringInterval?: RecurringInterval;
+  notes?: string;
+}
+
+export type UpdateExpenseInput = Partial<CreateExpenseInput>;
+
+export interface ExpenseFilters {
+  propertyId?: string;
+  category?: string;
+  incurredBy?: LLC;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface FinancialOverview {
+  period: string;
+  llcs: {
+    str: { revenue: number; expenses: number; netIncome: number };
+    lawn: { revenue: number; expenses: number; netIncome: number };
+    cleaning: { revenue: number; expenses: number; netIncome: number };
+  };
+  consolidated: { revenue: number; expenses: number; netIncome: number };
+  expenseBreakdown: ExpenseBreakdown[];
 }
 
 // ============================================================

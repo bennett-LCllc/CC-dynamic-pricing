@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { createProperty, updateProperty } from '@/lib/api';
-import type { Property, CreatePropertyInput, UpdatePropertyInput, PropertyType, PropertyStatus } from '@cc-ops/shared';
-import { X } from 'lucide-react';
+import type { Property, CreatePropertyInput, UpdatePropertyInput, PropertyType, PropertyStatus, PhotoCategory } from '@cc-ops/shared';
+import { X, ImagePlus, GripVertical, Trash2 } from 'lucide-react';
 
 interface PropertyFormProps {
   property?: Property | null;
@@ -69,6 +69,24 @@ export default function PropertyForm({ property, onClose, onSaved }: PropertyFor
   const [amenityInput, setAmenityInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [photos, setPhotos] = useState<Array<{ url: string; caption: string; category: PhotoCategory }>>([]);
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoCaption, setPhotoCaption] = useState('');
+  const [photoCategory, setPhotoCategory] = useState<PhotoCategory>('EXTERIOR');
+
+  const PHOTO_CATEGORIES: { value: PhotoCategory; label: string }[] = [
+    { value: 'EXTERIOR', label: 'Exterior' },
+    { value: 'INTERIOR', label: 'Interior' },
+    { value: 'KITCHEN', label: 'Kitchen' },
+    { value: 'BATHROOM', label: 'Bathroom' },
+    { value: 'BEDROOM', label: 'Bedroom' },
+    { value: 'LIVING_ROOM', label: 'Living Room' },
+    { value: 'POOL', label: 'Pool' },
+    { value: 'YARD', label: 'Yard' },
+    { value: 'DAMAGE', label: 'Damage' },
+    { value: 'BEFORE_AFTER', label: 'Before/After' },
+    { value: 'OTHER', label: 'Other' },
+  ];
 
   useEffect(() => {
     if (property) {
@@ -95,6 +113,16 @@ export default function PropertyForm({ property, onClose, onSaved }: PropertyFor
         listingUrlAirbnb: property.listingUrlAirbnb ?? '',
         listingUrlVrbo: property.listingUrlVrbo ?? '',
       });
+      // Load existing photos
+      if (property.photos) {
+        setPhotos(
+          property.photos.map((p) => ({
+            url: p.url,
+            caption: p.caption ?? '',
+            category: p.category,
+          }))
+        );
+      }
     }
   }, [property]);
 
@@ -120,20 +148,52 @@ export default function PropertyForm({ property, onClose, onSaved }: PropertyFor
     }
   };
 
+  const addPhoto = () => {
+    const url = photoUrl.trim();
+    if (!url) return;
+    setPhotos((prev) => [...prev, { url, caption: photoCaption.trim(), category: photoCategory }]);
+    setPhotoUrl('');
+    setPhotoCaption('');
+    setPhotoCategory('EXTERIOR');
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const movePhoto = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= photos.length) return;
+    setPhotos((prev) => {
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      const payload = {
+        ...form,
+        photos: photos.map((p, i) => ({
+          url: p.url,
+          caption: p.caption || undefined,
+          category: p.category,
+          sortOrder: i,
+        })),
+      };
       if (isEditing && property) {
-        await updateProperty(property.id, form as UpdatePropertyInput);
+        await updateProperty(property.id, payload as UpdatePropertyInput);
       } else {
-        await createProperty(form);
+        await createProperty(payload as CreatePropertyInput);
       }
       onSaved();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save property');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save property');
     } finally {
       setLoading(false);
     }
@@ -447,6 +507,123 @@ export default function PropertyForm({ property, onClose, onSaved }: PropertyFor
                 />
               </div>
             </div>
+          </div>
+
+          {/* ── Photos ── */}
+          <div className={sectionClass}>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">Photos</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Add photo URLs now. Upload to S3/storage will be available in phase 2.
+            </p>
+
+            {/* Add photo inputs */}
+            <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+              <div>
+                <label className={labelClass}>Photo URL</label>
+                <input
+                  type="url"
+                  className={inputClass}
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                  placeholder="https://example.com/photo.jpg"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Caption</label>
+                  <input
+                    type="text"
+                    className={inputClass}
+                    value={photoCaption}
+                    onChange={(e) => setPhotoCaption(e.target.value)}
+                    placeholder="e.g. Living room view"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Category</label>
+                  <select
+                    className={inputClass}
+                    value={photoCategory}
+                    onChange={(e) => setPhotoCategory(e.target.value as PhotoCategory)}
+                  >
+                    {PHOTO_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={addPhoto}
+                disabled={!photoUrl.trim()}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-ocean-500 text-white rounded-lg hover:bg-ocean-600 transition-colors disabled:opacity-50"
+              >
+                <ImagePlus className="w-4 h-4" />
+                Add Photo
+              </button>
+            </div>
+
+            {/* Photo list */}
+            {photos.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {photos.map((photo, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg group"
+                  >
+                    <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                    {photo.url.startsWith('http') && (
+                      <div className="w-12 h-12 rounded-lg bg-ocean-50 overflow-hidden shrink-0">
+                        <img
+                          src={photo.url}
+                          alt={photo.caption || `Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{photo.url}</div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {photo.caption && <span>{photo.caption}</span>}
+                        <span className="badge badge-info">{photo.category}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => movePhoto(index, -1)}
+                        disabled={index === 0}
+                        className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        title="Move up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => movePhoto(index, 1)}
+                        disabled={index === photos.length - 1}
+                        className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        title="Move down"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="p-1 text-muted-foreground hover:text-red-500"
+                        title="Remove"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className="text-xs text-muted-foreground text-right">
+                  {photos.length} photo{photos.length !== 1 ? 's' : ''} — drag to reorder
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Actions ── */}
