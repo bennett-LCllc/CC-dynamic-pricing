@@ -45,7 +45,26 @@ import type {
   CreateCustomerInput,
   UpdateCustomerInput,
   CustomerFilters,
+  User,
+  AuthLoginInput,
+  AuthRegisterInput,
+  AuthResponse,
+  UpdateUserInput,
+  SettingEntry,
+  SettingsMap,
 } from '@cc-ops/shared';
+
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('cc-ops-token');
+}
+
+async function authFetch(url: string, init?: RequestInit): Promise<Response> {
+  const token = getAuthToken();
+  const headers = new Headers(init?.headers);
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  return fetch(url, { ...init, headers });
+}
 
 export async function calculateRate(params: {
   base_rate: number;
@@ -667,6 +686,105 @@ export async function updateCustomer(id: string, data: UpdateCustomerInput): Pro
 
 export async function deleteCustomer(id: string): Promise<void> {
   const res = await fetch(`${API_URL}/api/customers/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+// ============================================================
+// Auth
+// ============================================================
+
+export async function login(data: AuthLoginInput): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Login failed' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function register(data: AuthRegisterInput): Promise<AuthResponse> {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Registration failed' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getMe(): Promise<User> {
+  const res = await authFetch(`${API_URL}/api/auth/me`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getUsers(): Promise<User[]> {
+  const res = await authFetch(`${API_URL}/api/auth/users`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateUser(id: string, data: UpdateUserInput): Promise<User> {
+  const res = await authFetch(`${API_URL}/api/auth/users/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteUserApi(id: string): Promise<void> {
+  const res = await authFetch(`${API_URL}/api/auth/users/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+// ============================================================
+// Settings
+// ============================================================
+
+export async function getSettings(): Promise<SettingsMap> {
+  const res = await fetch(`${API_URL}/api/settings`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function saveSettings(entries: SettingEntry[]): Promise<SettingsMap> {
+  const res = await authFetch(`${API_URL}/api/settings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entries }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteSetting(key: string): Promise<void> {
+  const res = await authFetch(`${API_URL}/api/settings/${key}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);

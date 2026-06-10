@@ -731,3 +731,55 @@ export interface MessageFilters {
   channel?: string;
   automated?: boolean;
 }
+
+// ============================================================
+// Auth
+// ============================================================
+
+export type UserRole = 'ADMIN' | 'MANAGER' | 'VIEWER';
+
+export interface User {
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthLoginInput {
+  email: string;
+  password: string;
+}
+
+export interface AuthRegisterInput {
+  name?: string;
+  email: string;
+  password: string;
+  role?: UserRole;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export interface UpdateUserInput {
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  password?: string;
+}
+
+// ============================================================
+// Settings
+// ============================================================
+
+export interface SettingEntry {
+  key: string;
+  value: string;
+}
+
+export interface SettingsMap {
+  [key: string]: string;
+}

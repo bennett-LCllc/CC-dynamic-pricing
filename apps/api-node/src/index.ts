@@ -17,6 +17,8 @@ import lawnRoutes from './routes/lawn';
 import financialsRoutes from './routes/financials';
 import messageRoutes from './routes/messages';
 import customerRoutes from './routes/customers';
+import authRoutes from './routes/auth';
+import settingsRoutes from './routes/settings';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -40,6 +42,8 @@ app.use('/api/lawn', lawnRoutes);
 app.use('/api/financials', financialsRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/settings', settingsRoutes);
 // app.use('/api/expenses', expenseRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 
