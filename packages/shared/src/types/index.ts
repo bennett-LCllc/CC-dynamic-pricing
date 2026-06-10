@@ -508,17 +508,106 @@ export interface FinancialOverview {
 // Customer Types (Lawn & Cleaning external customers)
 // ============================================================
 
+export type CustomerType = 'STR_OWNER' | 'PM_COMPANY' | 'RESIDENTIAL' | 'COMMERCIAL';
+export type CustomerStatus = 'ACTIVE' | 'INACTIVE' | 'CHURNED';
+export type LotSize = 'EIGHTH_ACRE' | 'QUARTER_ACRE' | 'HALF_ACRE' | 'ACRE' | 'LARGE' | 'COMMERCIAL';
+export type LawnPackage = 'BASIC' | 'STANDARD' | 'PREMIUM' | 'SHOWCASE';
+export type CleaningFrequency = 'PER_TURNOVER' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
+export type ServiceType = 'MOW' | 'EDGE' | 'TRIM' | 'FERTILIZE' | 'WEED_CONTROL' | 'AERATE' | 'OVERSEED' | 'LEAF_REMOVAL' | 'PRESSURE_WASH' | 'FULL_SERVICE';
+
+export interface CustomerProperty {
+  id: string;
+  customerId: string;
+  name?: string | null;
+  address: string;
+  zipCode: string;
+  propertyType: PropertyType;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  squareFeet?: number | null;
+  lotSize: LotSize;
+  isActive: boolean;
+  lawnPackage?: LawnPackage | null;
+  cleaningPackage?: CleaningFrequency | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExternalLawnJob {
+  id: string;
+  customerId: string;
+  propertyAddress: string;
+  scheduledDate: string;
+  completedAt?: string | null;
+  crewId?: string | null;
+  serviceType: ServiceType;
+  status: JobStatus;
+  customerCharge: number;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface ExternalCleaningJob {
+  id: string;
+  customerId: string;
+  propertyAddress: string;
+  scheduledStart: string;
+  completedAt?: string | null;
+  cleanerId?: string | null;
+  cleaningType: CleaningType;
+  status: JobStatus;
+  customerCharge: number;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone: string;
+  company?: string | null;
+  type: CustomerType;
+  status: CustomerStatus;
+  stripeCustomerId?: string | null;
+  notes?: string | null;
+  properties?: CustomerProperty[];
+  lawnJobs?: ExternalLawnJob[];
+  cleaningJobs?: ExternalCleaningJob[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CustomerSummary {
   id: string;
   name: string;
   email: string | null;
   phone: string;
-  type: 'STR_OWNER' | 'PM_COMPANY' | 'RESIDENTIAL' | 'COMMERCIAL';
-  status: 'ACTIVE' | 'INACTIVE' | 'CHURNED';
+  type: CustomerType;
+  status: CustomerStatus;
   propertyCount: number;
   monthlyRecurringRevenue: number;
   lastServiceDate: string | null;
   createdAt: string;
+}
+
+export interface CreateCustomerInput {
+  name: string;
+  email?: string;
+  phone: string;
+  company?: string;
+  type?: CustomerType;
+  status?: CustomerStatus;
+  stripeCustomerId?: string;
+  notes?: string;
+}
+
+export type UpdateCustomerInput = Partial<CreateCustomerInput>;
+
+export interface CustomerFilters {
+  search?: string;
+  type?: CustomerType;
+  status?: CustomerStatus;
 }
 
 // ============================================================
@@ -610,4 +699,35 @@ export interface GuestMessage {
   sentAt: string;
   automated: boolean;
   channel: 'AIRBNB' | 'VRBO' | 'SMS' | 'EMAIL';
+}
+
+export interface CreateMessageTemplateInput {
+  trigger: string;
+  name: string;
+  subject?: string;
+  content: string;
+  channel?: 'AIRBNB' | 'VRBO' | 'SMS' | 'EMAIL';
+  isActive?: boolean;
+  variables?: string[];
+}
+
+export type UpdateMessageTemplateInput = Partial<CreateMessageTemplateInput>;
+
+export interface CreateMessageInput {
+  bookingId: string;
+  direction: 'INBOUND' | 'OUTBOUND';
+  channel?: 'AIRBNB' | 'VRBO' | 'SMS' | 'EMAIL';
+  content: string;
+  templateId?: string;
+  automated?: boolean;
+  sentAt?: string;
+}
+
+export type UpdateMessageInput = Partial<CreateMessageInput>;
+
+export interface MessageFilters {
+  bookingId?: string;
+  direction?: string;
+  channel?: string;
+  automated?: boolean;
 }

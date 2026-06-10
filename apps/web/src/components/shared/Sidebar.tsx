@@ -6,6 +6,7 @@ import {
   Home,
   Building2,
   CalendarDays,
+  CalendarRange,
   Sparkles,
   TreePine,
   DollarSign,
@@ -16,15 +17,16 @@ import {
 import clsx from 'clsx';
 
 const navItems = [
-  { href: '/' as const, label: 'Dashboard', icon: Home },
-  { href: '/properties' as const, label: 'Properties', icon: Building2 },
-  { href: '/bookings' as const, label: 'Bookings', icon: CalendarDays },
-  { href: '/pricing' as const, label: 'Pricing', icon: DollarSign },
-  { href: '/cleaning' as const, label: 'Cleaning', icon: Sparkles },
-  { href: '/lawn' as const, label: 'Lawn Care', icon: TreePine },
-  { href: '/financials' as const, label: 'Financials', icon: BarChart3 },
-  { href: '/messages' as const, label: 'Messages', icon: MessageSquare },
-  { href: '/settings' as const, label: 'Settings', icon: Settings },
+  { href: '/' as const, label: 'Dashboard', icon: Home, basePath: '/' },
+  { href: '/properties' as const, label: 'Properties', icon: Building2, basePath: '/properties' },
+  { href: '/bookings' as const, label: 'Bookings', icon: CalendarDays, basePath: '/bookings' },
+  { href: '/bookings/calendar' as const, label: 'Calendar', icon: CalendarRange, basePath: '/bookings/calendar' },
+  { href: '/pricing' as const, label: 'Pricing', icon: DollarSign, basePath: '/pricing' },
+  { href: '/cleaning' as const, label: 'Cleaning', icon: Sparkles, basePath: '/cleaning' },
+  { href: '/lawn' as const, label: 'Lawn Care', icon: TreePine, basePath: '/lawn' },
+  { href: '/financials' as const, label: 'Financials', icon: BarChart3, basePath: '/financials' },
+  { href: '/messages' as const, label: 'Messages', icon: MessageSquare, basePath: '/messages' },
+  { href: '/settings' as const, label: 'Settings', icon: Settings, basePath: '/settings' },
 ] as const;
 
 export function Sidebar() {
@@ -43,8 +45,13 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.href !== '/' && pathname.startsWith(item.href));
+          const isActive =
+            pathname === item.href ||
+            (item.basePath !== '/' &&
+              pathname.startsWith(item.basePath) &&
+              // Prevent /bookings from matching /bookings/calendar
+              pathname.length <= item.basePath.length + 1);
+          const isActiveExact = pathname === item.href;
           const Icon = item.icon;
 
           return (

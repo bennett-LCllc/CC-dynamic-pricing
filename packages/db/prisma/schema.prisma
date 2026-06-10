@@ -137,6 +137,21 @@ model Message {
   @@index([bookingId, sentAt])
 }
 
+model MessageTemplate {
+  id          String         @id @default(cuid())
+  trigger     String
+  name        String
+  subject     String?
+  content     String
+  channel     MessageChannel @default(AIRBNB)
+  isActive    Boolean        @default(true)
+  variables   String[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([trigger])
+}
+
 // ============================================================
 // Pricing Engine
 // ============================================================

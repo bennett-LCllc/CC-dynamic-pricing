@@ -15,6 +15,8 @@ import bookingRoutes from './routes/bookings';
 import cleaningRoutes from './routes/cleaning';
 import lawnRoutes from './routes/lawn';
 import financialsRoutes from './routes/financials';
+import messageRoutes from './routes/messages';
+import customerRoutes from './routes/customers';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -36,8 +38,8 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/cleaning', cleaningRoutes);
 app.use('/api/lawn', lawnRoutes);
 app.use('/api/financials', financialsRoutes);
-// app.use('/api/customers', customerRoutes);
-// app.use('/api/messages', messageRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/messages', messageRoutes);
 // app.use('/api/expenses', expenseRoutes);
 // app.use('/api/webhooks', webhookRoutes);
 

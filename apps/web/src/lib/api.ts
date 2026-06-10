@@ -33,6 +33,18 @@ import type {
   ExpenseFilters,
   FinancialOverview,
   ExpenseBreakdown,
+  MessageTemplate,
+  CreateMessageTemplateInput,
+  UpdateMessageTemplateInput,
+  GuestMessage,
+  CreateMessageInput,
+  UpdateMessageInput,
+  MessageFilters,
+  Customer,
+  CustomerSummary,
+  CreateCustomerInput,
+  UpdateCustomerInput,
+  CustomerFilters,
 } from '@cc-ops/shared';
 
 export async function calculateRate(params: {
@@ -510,6 +522,151 @@ export async function updateExpense(id: string, data: UpdateExpenseInput): Promi
 
 export async function deleteExpense(id: string): Promise<void> {
   const res = await fetch(`${API_URL}/api/financials/expenses/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+// ============================================================
+// Messages
+// ============================================================
+
+export async function getMessageTemplates(): Promise<MessageTemplate[]> {
+  const res = await fetch(`${API_URL}/api/messages/templates`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function createMessageTemplate(data: CreateMessageTemplateInput): Promise<MessageTemplate> {
+  const res = await fetch(`${API_URL}/api/messages/templates`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateMessageTemplate(id: string, data: UpdateMessageTemplateInput): Promise<MessageTemplate> {
+  const res = await fetch(`${API_URL}/api/messages/templates/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteMessageTemplate(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/messages/templates/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+export async function getMessages(filters?: MessageFilters): Promise<GuestMessage[]> {
+  const sp = new URLSearchParams();
+  if (filters?.bookingId) sp.set('bookingId', filters.bookingId);
+  if (filters?.direction) sp.set('direction', filters.direction);
+  if (filters?.channel) sp.set('channel', filters.channel);
+  if (filters?.automated !== undefined) sp.set('automated', String(filters.automated));
+  const qs = sp.toString();
+  const res = await fetch(`${API_URL}/api/messages${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getBookingMessages(bookingId: string): Promise<GuestMessage[]> {
+  const res = await fetch(`${API_URL}/api/messages/booking/${bookingId}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function sendMessage(data: CreateMessageInput): Promise<GuestMessage> {
+  const res = await fetch(`${API_URL}/api/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteMessage(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/messages/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+}
+
+// ============================================================
+// Customers CRUD
+// ============================================================
+
+export async function getCustomers(filters?: CustomerFilters): Promise<CustomerSummary[]> {
+  const sp = new URLSearchParams();
+  if (filters?.search) sp.set('search', filters.search);
+  if (filters?.type) sp.set('type', filters.type);
+  if (filters?.status) sp.set('status', filters.status);
+  const qs = sp.toString();
+  const res = await fetch(`${API_URL}/api/customers${qs ? '?' + qs : ''}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getCustomer(id: string): Promise<Customer> {
+  const res = await fetch(`${API_URL}/api/customers/${id}`);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const json = await res.json();
+  return json.data;
+}
+
+export async function createCustomer(data: CreateCustomerInput): Promise<Customer> {
+  const res = await fetch(`${API_URL}/api/customers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function updateCustomer(id: string, data: UpdateCustomerInput): Promise<Customer> {
+  const res = await fetch(`${API_URL}/api/customers/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `API error: ${res.status}`);
+  }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteCustomer(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/api/customers/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
