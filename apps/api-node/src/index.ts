@@ -19,18 +19,28 @@ import messageRoutes from './routes/messages';
 import customerRoutes from './routes/customers';
 import authRoutes from './routes/auth';
 import settingsRoutes from './routes/settings';
+import { authMiddleware } from './middleware/auth';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001'] }));
+app.use(cors({ origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'] }));
 app.use(express.json());
 
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'healthy', service: 'cc-ops-api', timestamp: new Date().toISOString() });
+});
+
+// Global auth middleware for all /api routes except /api/auth/login and /api/auth/register
+app.use('/api', (req, res, next) => {
+  if (req.path.startsWith('/api/auth/login') || req.path.startsWith('/api/auth/register')) {
+    next();
+    return;
+  }
+  authMiddleware(req, res, next);
 });
 
 // Routes

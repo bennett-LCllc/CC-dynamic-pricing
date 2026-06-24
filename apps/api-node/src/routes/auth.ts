@@ -13,6 +13,7 @@ import {
   listUsers,
   generateToken,
 } from '../services/auth';
+import { prisma } from '@cc-ops/db';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -58,7 +59,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+    const token = generateToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
     res.json({ data: { token, user } });
   } catch (err) {
     console.error('POST /api/auth/login error:', err);
@@ -81,7 +82,7 @@ router.post('/register', async (req: Request, res: Response) => {
     const existing = await getUserById(parsed.data.email).catch(() => null);
     // Check by email uniqueness via create catch
     const user = await createUser(parsed.data);
-    const token = generateToken({ userId: user.id, email: user.email, role: user.role });
+    const token = generateToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: 0 });
     res.status(201).json({ data: { token, user } });
   } catch (err) {
     const message = err instanceof Error ? err.message : '';
@@ -137,6 +138,12 @@ router.put('/users/:id', authMiddleware, async (req: Request, res: Response) => 
     return;
   }
 
+  // Non-admin users cannot change roles
+  if (req.user!.role !== 'ADMIN' && parsed.data.role !== undefined) {
+    res.status(403).json({ error: 'Only admins can change user roles' });
+    return;
+  }
+
   try {
     const data = await updateUser(req.params.id, parsed.data);
     res.json({ data });
@@ -151,7 +158,26 @@ router.put('/users/:id', authMiddleware, async (req: Request, res: Response) => 
 /* -------------------------------------------------------------------------- */
 
 router.delete('/users/:id', authMiddleware, async (req: Request, res: Response) => {
+  if (req.user!.role !== 'ADMIN') {
+    res.status(403).json({ error: 'Only admins can delete users' });
+    return;
+  }
+
   try {
+    // Last-admin guard: prevent deleting the last admin
+    const targetUser = await getUserById(req.params.id);
+    if (!targetUser) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    if (targetUser.role === 'ADMIN') {
+      const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+      if (adminCount <= 1) {
+        res.status(403).json({ error: 'Cannot delete the last admin account' });
+        return;
+      }
+    }
+
     await deleteUser(req.params.id);
     res.json({ success: true });
   } catch (err) {

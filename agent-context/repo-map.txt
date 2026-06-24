@@ -1,0 +1,128 @@
+[1m
+Project Structure (75 files):
+[0m
+├── .claude
+│   └── hooks
+│       └── bridge-check.py[2m (python, 14 symbols)[0m
+├── apps
+│   ├── api
+│   │   └── src
+│   │       ├── pricing
+│   │       │   ├── engine.py[2m (python, 13 symbols)[0m
+│   │       │   └── routes.py[2m (python, 19 symbols)[0m
+│   │       └── main.py[2m (python, 7 symbols)[0m
+│   ├── api-node
+│   │   └── src
+│   │       ├── middleware
+│   │       │   └── auth.ts[2m (typescript, 5 symbols)[0m
+│   │       ├── routes
+│   │       │   ├── auth.ts[2m (typescript, 15 symbols)[0m
+│   │       │   ├── bookings.ts[2m (typescript, 14 symbols)[0m
+│   │       │   ├── cleaning.ts[2m (typescript, 17 symbols)[0m
+│   │       │   ├── customers.ts[2m (typescript, 13 symbols)[0m
+│   │       │   ├── dashboard.ts[2m (typescript, 5 symbols)[0m
+│   │       │   ├── financials.ts[2m (typescript, 14 symbols)[0m
+│   │       │   ├── lawn.ts[2m (typescript, 15 symbols)[0m
+│   │       │   ├── messages.ts[2m (typescript, 19 symbols)[0m
+│   │       │   ├── properties.ts[2m (typescript, 12 symbols)[0m
+│   │       │   └── settings.ts[2m (typescript, 10 symbols)[0m
+│   │       ├── services
+│   │       │   ├── auth.ts[2m (typescript, 17 symbols)[0m
+│   │       │   ├── bookings.ts[2m (typescript, 10 symbols)[0m
+│   │       │   ├── cleaning.ts[2m (typescript, 12 symbols)[0m
+│   │       │   ├── customers.ts[2m (typescript, 8 symbols)[0m
+│   │       │   ├── dashboard.ts[2m (typescript, 4 symbols)[0m
+│   │       │   ├── financials.ts[2m (typescript, 13 symbols)[0m
+│   │       │   ├── lawn.ts[2m (typescript, 11 symbols)[0m
+│   │       │   ├── messages.ts[2m (typescript, 16 symbols)[0m
+│   │       │   ├── properties.ts[2m (typescript, 11 symbols)[0m
+│   │       │   └── settings.ts[2m (typescript, 7 symbols)[0m
+│   │       └── index.ts[2m (typescript, 28 symbols)[0m
+│   └── web
+│       ├── src
+│       │   ├── app
+│       │   │   ├── bookings
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx[2m (tsx, 11 symbols)[0m
+│       │   │   │   ├── calendar
+│       │   │   │   │   └── page.tsx[2m (tsx, 29 symbols)[0m
+│       │   │   │   └── page.tsx[2m (tsx, 14 symbols)[0m
+│       │   │   ├── cleaning
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx[2m (tsx, 12 symbols)[0m
+│       │   │   │   └── page.tsx[2m (tsx, 12 symbols)[0m
+│       │   │   ├── customers
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx[2m (tsx, 11 symbols)[0m
+│       │   │   │   └── page.tsx[2m (tsx, 12 symbols)[0m
+│       │   │   ├── financials
+│       │   │   │   └── page.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   ├── lawn
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx[2m (tsx, 11 symbols)[0m
+│       │   │   │   └── page.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   ├── login
+│       │   │   │   └── page.tsx[2m (tsx, 6 symbols)[0m
+│       │   │   ├── messages
+│       │   │   │   └── page.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   ├── pricing
+│       │   │   │   └── page.tsx[2m (tsx, 9 symbols)[0m
+│       │   │   ├── properties
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx[2m (tsx, 11 symbols)[0m
+│       │   │   │   └── page.tsx[2m (tsx, 12 symbols)[0m
+│       │   │   ├── settings
+│       │   │   │   └── page.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   ├── layout.tsx[2m (tsx, 9 symbols)[0m
+│       │   │   └── page.tsx[2m (tsx, 14 symbols)[0m
+│       │   ├── components
+│       │   │   ├── bookings
+│       │   │   │   └── BookingForm.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   ├── cleaning
+│       │   │   │   └── CleaningJobForm.tsx[2m (tsx, 10 symbols)[0m
+│       │   │   ├── customers
+│       │   │   │   └── CustomerForm.tsx[2m (tsx, 8 symbols)[0m
+│       │   │   ├── dashboard
+│       │   │   │   ├── AlertsPanel.tsx[2m (tsx, 5 symbols)[0m
+│       │   │   │   ├── LLCSummary.tsx[2m (tsx, 5 symbols)[0m
+│       │   │   │   ├── QuickActions.tsx[2m (tsx, 5 symbols)[0m
+│       │   │   │   ├── RecentActivity.tsx[2m (tsx, 5 symbols)[0m
+│       │   │   │   └── StatsCards.tsx[2m (tsx, 5 symbols)[0m
+│       │   │   ├── financials
+│       │   │   │   └── ExpenseForm.tsx[2m (tsx, 8 symbols)[0m
+│       │   │   ├── lawn
+│       │   │   │   └── LawnJobForm.tsx[2m (tsx, 11 symbols)[0m
+│       │   │   ├── messages
+│       │   │   │   └── MessageThread.tsx[2m (tsx, 10 symbols)[0m
+│       │   │   ├── properties
+│       │   │   │   └── PropertyForm.tsx[2m (tsx, 13 symbols)[0m
+│       │   │   └── shared
+│       │   │       ├── Header.tsx[2m (tsx, 4 symbols)[0m
+│       │   │       ├── PlatformBadge.tsx[2m (tsx, 5 symbols)[0m
+│       │   │       ├── Sidebar.tsx[2m (tsx, 7 symbols)[0m
+│       │   │       └── StatusBadge.tsx[2m (tsx, 7 symbols)[0m
+│       │   └── lib
+│       │       ├── api.ts[2m (typescript, 65 symbols)[0m
+│       │       └── auth-context.tsx[2m (tsx, 7 symbols)[0m
+│       ├── next-env.d.ts[2m (typescript, 1 symbols)[0m
+│       ├── next.config.js[2m (javascript, 2 symbols)[0m
+│       ├── postcss.config.js[2m (javascript, 1 symbols)[0m
+│       └── tailwind.config.ts[2m (typescript, 3 symbols)[0m
+├── packages
+│   ├── db
+│   │   ├── prisma
+│   │   │   └── seed.ts[2m (typescript, 5 symbols)[0m
+│   │   └── index.ts[2m (typescript, 4 symbols)[0m
+│   └── shared
+│       └── src
+│           ├── constants
+│           │   ├── corpus-christi.ts[2m (typescript, 10 symbols)[0m
+│           │   └── index.ts[2m (typescript, 1 symbols)[0m
+│           ├── types
+│           │   └── index.ts[2m (typescript, 78 symbols)[0m
+│           ├── utils
+│           │   ├── index.ts[2m (typescript, 1 symbols)[0m
+│           │   └── pricing.ts[2m (typescript, 7 symbols)[0m
+│           └── index.ts[2m (typescript, 1 symbols)[0m
+└── docker-compose.yml[2m (yaml, 0 symbols)[0m
+

@@ -244,18 +244,18 @@ export async function getDashboardOverview() {
     upcomingBookings,
     llcs: {
       str: {
-        units: `${activeProperties} / 15`,
+        units: `${activeProperties}`,
         mtdRevenue,
         occupancy: `${occupancyRate}%`,
       },
       lawn: {
-        clients: `${activeCustomers} / 45`,
-        mtdRevenue: lawnExpenses, // Will be 0 until revenue tracking is added
+        clients: `${activeCustomers}`,
+        mtdRevenue: 0, // Revenue tracking not yet implemented for lawn
         jobsToday: lawnScheduledToday,
       },
       cleaning: {
-        clients: `${activeCustomers} / 50`,
-        mtdRevenue: cleaningExpenses, // Will be 0 until revenue tracking is added
+        clients: `${activeCustomers}`,
+        mtdRevenue: 0, // Revenue tracking not yet implemented for cleaning
         turnoversToday: cleaningScheduledToday,
       },
     },

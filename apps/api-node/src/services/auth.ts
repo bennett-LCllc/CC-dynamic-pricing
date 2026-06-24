@@ -6,21 +6,26 @@ import { prisma } from '@cc-ops/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
-const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is required');
+  process.exit(1);
+}
+const JWT_EXPIRES_IN = '1h';
 
 export interface TokenPayload {
   userId: string;
   email: string | null;
   role: string;
+  tokenVersion: number;
 }
 
 export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, JWT_SECRET!) as TokenPayload;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -34,14 +39,14 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 export async function authenticateUser(
   email: string,
   password: string,
-): Promise<{ id: string; name: string | null; email: string | null; role: string } | null> {
+): Promise<{ id: string; name: string | null; email: string | null; role: string; tokenVersion: number } | null> {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) return null;
 
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return { id: user.id, name: user.name, email: user.email, role: user.role, tokenVersion: user.tokenVersion };
 }
 
 export async function createUser(data: {
@@ -77,7 +82,10 @@ export async function updateUser(
   if (data.name !== undefined) updateData.name = data.name;
   if (data.email !== undefined) updateData.email = data.email;
   if (data.role !== undefined) updateData.role = data.role;
-  if (data.password) updateData.passwordHash = await hashPassword(data.password);
+  if (data.password) {
+    updateData.passwordHash = await hashPassword(data.password);
+    updateData.tokenVersion = { increment: 1 };
+  }
 
   return prisma.user.update({
     where: { id },

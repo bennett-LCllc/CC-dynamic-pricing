@@ -95,12 +95,37 @@ export async function getBooking(id: string) {
 // ============================================================
 
 export async function createBooking(data: CreateBookingInput) {
-  // Auto-calculate nights and total if not provided
+  // Validate dates
   const checkIn = new Date(data.checkIn);
   const checkOut = new Date(data.checkOut);
+  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+    throw new Error('Invalid date format for checkIn or checkOut');
+  }
+  if (checkOut <= checkIn) {
+    throw new Error('checkOut must be after checkIn');
+  }
+
+  // Auto-calculate nights and total if not provided
   const nights = data.totalNights || Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
   const subtotal = data.subtotal || (Number(data.nightlyRate) * nights);
   const totalAmount = data.totalAmount || subtotal + Number(data.cleaningFee || 0) + Number(data.petFee || 0);
+
+  if (isNaN(totalAmount)) {
+    throw new Error('Invalid amount calculation — check numeric fields');
+  }
+
+  // Check for overlapping bookings on the same property
+  const overlapping = await prisma.booking.findFirst({
+    where: {
+      propertyId: data.propertyId,
+      status: { notIn: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW] },
+      checkIn: { lt: checkOut },
+      checkOut: { gt: checkIn },
+    },
+  });
+  if (overlapping) {
+    throw new Error('Property is already booked for the selected dates');
+  }
 
   return prisma.booking.create({
     data: {
@@ -145,7 +170,7 @@ export async function updateBooking(id: string, data: UpdateBookingInput) {
   if (data.propertyId) updateData.propertyId = data.propertyId;
   if (data.platform) updateData.platform = data.platform;
   if (data.platformBookingId !== undefined) updateData.platformBookingId = data.platformBookingId;
-  if (data.guestName) updateData.guestName = data.guestName;
+  if (data.guestName !== undefined) updateData.guestName = data.guestName;
   if (data.guestEmail !== undefined) updateData.guestEmail = data.guestEmail;
   if (data.guestPhone !== undefined) updateData.guestPhone = data.guestPhone;
   if (data.guestCount !== undefined) updateData.guestCount = data.guestCount;

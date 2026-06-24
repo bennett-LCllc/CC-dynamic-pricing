@@ -1,0 +1,39 @@
+# Project Context
+
+Generated: Wed Jun 17 23:37:58 CDT 2026
+
+## CodeGraph Status
+
+[1m
+CodeGraph Status
+[0m
+[36mProject:[0m /Users/michael.bennett@cognitedata.com/corpus-christi-ops
+
+[1mIndex Statistics:[0m
+  Files:     75
+  Nodes:     861
+  Edges:     2,025
+  DB Size:   2.71 MB
+  Backend:   [32mnode:sqlite — built-in (full WAL)[0m
+  Journal:   [32mwal[0m
+
+[1mNodes by Kind:[0m
+  import          266
+  function        216
+  constant        112
+  file            74
+  interface       73
+  route           70
+  type_alias      31
+  variable        10
+  class           9
+
+[1mFiles by Language:[0m
+  tsx             35
+  typescript      33
+  python          4
+  javascript      2
+  yaml            1
+
+[32m✓[0m Index is up to date
+

@@ -30,7 +30,7 @@ const upsertSchema = z.object({
 /*  GET /api/settings                                                         */
 /* -------------------------------------------------------------------------- */
 
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', authMiddleware, async (_req: Request, res: Response) => {
   try {
     const data = await getSettings();
     res.json({ data });

@@ -131,7 +131,7 @@ async function calculateRevenue(
   if (source === 'str') {
     const bookings = await prisma.booking.findMany({
       where: {
-        checkIn: { gte: from, lte: to },
+        checkOut: { gte: from, lte: to },
         status: { notIn: ['CANCELLED', 'NO_SHOW'] },
       },
       select: { totalAmount: true },

@@ -1,4 +1,19 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__initial_instructions",
+      "mcp__serena__find_symbol",
+      "mcp__serena__replace_content",
+      "Bash(npx prisma *)",
+      "Bash(DATABASE_URL=\"postgresql://ccops:ccops_dev_password@localhost:5432/corpus_christi_ops\" cd /Users/michael.bennett@cognitedata.com/corpus-christi-ops/packages/db)",
+      "Bash(ln -sf /Users/michael.bennett@cognitedata.com/corpus-christi-ops/.env /Users/michael.bennett@cognitedata.com/corpus-christi-ops/packages/db/.env)",
+      "Bash(npm ls *)",
+      "Bash(npx *)",
+      "Bash(pg_isready -h localhost -p 5432)",
+      "Bash(docker compose up *)"
+    ]
+  },
   "enabledMcpjsonServers": [
     "codegraph"
   ]
