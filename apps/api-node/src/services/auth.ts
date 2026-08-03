@@ -61,7 +61,7 @@ export async function createUser(data: {
       name: data.name,
       email: data.email,
       passwordHash,
-      role: (data.role as 'ADMIN' | 'MANAGER' | 'VIEWER') || 'ADMIN',
+      role: (data.role as 'ADMIN' | 'MANAGER' | 'VIEWER') || 'VIEWER',
     },
   });
   return { id: user.id, name: user.name, email: user.email, role: user.role };

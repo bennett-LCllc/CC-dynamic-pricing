@@ -34,9 +34,12 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'healthy', service: 'cc-ops-api', timestamp: new Date().toISOString() });
 });
 
-// Global auth middleware for all /api routes except /api/auth/login and /api/auth/register
+// Global auth middleware for all /api routes except /api/auth/login and /api/auth/register.
+// NOTE: Express strips the mount prefix, so req.path for "/api/auth/login" is "/auth/login".
+// Match on req.originalUrl (the unstripped path) so the exemption actually fires.
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/api/auth/login') || req.path.startsWith('/api/auth/register')) {
+  const url = req.originalUrl;
+  if (url.startsWith('/api/auth/login') || url.startsWith('/api/auth/register')) {
     next();
     return;
   }

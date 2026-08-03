@@ -27,11 +27,13 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+// Public self-registration: role is intentionally NOT accepted here. New accounts are
+// VIEWER only; an existing ADMIN promotes users via PUT /api/auth/users/:id. This closes
+// the open-admin-registration privilege-escalation path (HG-003 scope on create).
 const registerSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(['ADMIN', 'MANAGER', 'VIEWER']).optional(),
 });
 
 const updateUserSchema = z.object({

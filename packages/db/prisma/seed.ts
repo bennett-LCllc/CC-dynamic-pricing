@@ -6,6 +6,7 @@
 
 import { PrismaClient, Platform, BookingStatus, PropertyStatus } from '@prisma/client';
 import { addDays, addHours } from 'date-fns';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -365,6 +366,28 @@ async function main() {
       isActive: true,
     },
   });
+
+  // ============================================================
+  // Bootstrap admin user — required, because the app has no public admin-creation route
+  // and registration only creates VIEWER accounts. Without this, no one can log in.
+  // ============================================================
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@corpus-christi-ops.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe!Admin123';
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    await prisma.user.create({
+      data: { name: 'Admin', email: adminEmail, passwordHash, role: 'ADMIN' },
+    });
+    if (!process.env.SEED_ADMIN_PASSWORD) {
+      console.warn(
+        '⚠️  Seeded admin using the DEFAULT password. Set SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD in .env and re-run seed (or change it via the UI) before deploying.',
+      );
+    }
+    console.log(`  Admin user: ${adminEmail}`);
+  } else {
+    console.log(`  Admin user already exists: ${adminEmail}`);
+  }
 
   console.log('✅ Seed complete!');
   console.log(`  Properties: 2 (${property1.name}, ${property2.name})`);
