@@ -1,0 +1,26 @@
+{
+  "product_name": "CC Ops — Post-Lawn-Sunset (White-Label Focus)",
+  "business_model": "b2b_saas",
+  "retention": {
+    "d30_cohorts": [0.55, 0.52, 0.48, 0.45],
+    "d90_cohorts": [0.42, 0.38, 0.35],
+    "curve_flattening": true
+  },
+  "engagement": {
+    "dau_mau_ratio": 0.35,
+    "avg_sessions_per_week": 5.2,
+    "key_action_rate": 0.75,
+    "session_depth_score": 0.8
+  },
+  "satisfaction": {
+    "sean_ellis_very_disappointed": 0.52,
+    "sean_ellis_sample_size": 45,
+    "nps_score": 52,
+    "nps_sample_size": 70
+  },
+  "growth": {
+    "organic_signup_pct": 0.45,
+    "referral_rate": 0.35,
+    "mom_growth_rate": 0.18
+  }
+}

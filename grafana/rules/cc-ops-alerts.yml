@@ -1,0 +1,167 @@
+groups:
+  - name: cc-ops-api-alerts
+    interval: 30s
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="cc-ops-api", code=~"5.."}[5m])) by (job)
+          /
+          sum(rate(http_requests_total{job="cc-ops-api"}[5m])) by (job)
+          > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: cc-ops-api
+        annotations:
+          summary: 'High 5xx error rate on {{ $labels.job }}'
+          description: '5xx error rate is {{ $value | humanizePercentage }} for the last 5 minutes'
+
+      # High latency
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="cc-ops-api"}[5m])) by (le, job)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: cc-ops-api
+        annotations:
+          summary: 'High p95 latency on {{ $labels.job }}'
+          description: 'p95 latency is {{ $value }}s for the last 5 minutes'
+
+      # Service down
+      - alert: ServiceDown
+        expr: |
+          up{job="cc-ops-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cc-ops-api
+        annotations:
+          summary: 'Service {{ $labels.job }} is down'
+          description: 'Service has been down for more than 1 minute'
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          (process_resident_memory_bytes{job="cc-ops-api"} / 1024 / 1024) > 500
+        for: 5m
+        labels:
+          severity: warning
+          service: cc-ops-api
+        annotations:
+          summary: 'High memory usage on {{ $labels.job }}'
+          description: 'Memory usage is {{ $value | humanize }}MB'
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total{job="cc-ops-api"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: cc-ops-api
+        annotations:
+          summary: 'High CPU usage on {{ $labels.job }}'
+          description: 'CPU usage is {{ $value | humanizePercentage }}'
+
+      # Event loop lag
+      - alert: EventLoopLag
+        expr: |
+          nodejs_event_loop_lag_seconds{job="cc-ops-api"} > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: cc-ops-api
+        annotations:
+          summary: 'Event loop lag on {{ $labels.job }}'
+          description: 'Event loop lag is {{ $value }}s'
+
+  - name: cc-ops-infrastructure-alerts
+    interval: 30s
+    rules:
+      # Prometheus down
+      - alert: PrometheusDown
+        expr: |
+          up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: 'Prometheus is down'
+          description: 'Prometheus has been down for more than 1 minute'
+
+      # Grafana down
+      - alert: GrafanaDown
+        expr: |
+          up{job="grafana"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: 'Grafana is down'
+          description: 'Grafana has been down for more than 1 minute'
+
+      # Loki down
+      - alert: LokiDown
+        expr: |
+          up{job="loki"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: 'Loki is down'
+          description: 'Loki has been down for more than 1 minute'
+
+      # Tempo down
+      - alert: TempoDown
+        expr: |
+          up{job="tempo"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: 'Tempo is down'
+          description: 'Tempo has been down for more than 1 minute'
+
+      # Alertmanager down
+      - alert: AlertmanagerDown
+        expr: |
+          up{job="alertmanager"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: 'Alertmanager is down'
+          description: 'Alertmanager has been down for more than 1 minute'
+
+      # Disk space
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: 'Disk space low'
+          description: 'Disk space is below 10%'
+
+      # High container restarts
+      - alert: HighContainerRestarts
+        expr: |
+          rate(container_restart_count[15m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: 'Container restarting frequently'
+          description: 'Container {{ $labels.container }} has restarted'

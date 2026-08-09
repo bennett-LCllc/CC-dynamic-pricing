@@ -1,0 +1,793 @@
+openapi: 3.0.3
+info:
+  title: CC Ops API Documentation
+  version: 1.0.0
+  description: |
+    API documentation for the CC Ops backend, covering both the Express.js
+    REST API (Node.js) and the FastAPI pricing engine.  This spec describes
+    endpoint URLs, request/response schemas, and example payloads.
+servers:
+  - url: http://localhost:4000
+    description: Development server
+paths:
+  /api/properties:
+    get:
+      summary: List properties
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: A list of properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Property'
+    post:
+      summary: Create a new property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProperty'
+      responses:
+        '201':
+          description: Property created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+  /api/properties/{id}:
+    get:
+      summary: Get a single property by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Property details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '404':
+          description: Property not found
+  /api/bookings:
+    get:
+      summary: List bookings (optional filter by propertyId)
+      parameters:
+        - name: propertyId
+          in: query
+          schema:
+            type: string
+            description: Filter bookings by property ID
+      responses:
+        '200':
+          description: List of bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+    post:
+      summary: Create a new booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewBooking'
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /api/bookings/{id}:
+    get:
+      summary: Get a booking by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '404':
+          description: Booking not found
+    put:
+      summary: Update a booking by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBooking'
+      responses:
+        '200':
+          description: Updated booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '404':
+          description: Booking not found
+    delete:
+      summary: Delete a booking by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deletion successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '404':
+          description: Booking not found
+  /api/cleaning/jobs:
+    get:
+      summary: List cleaning jobs (filterable)
+      parameters:
+        - name: statuses
+          in: query
+          schema:
+            type: string
+            description: Comma‑separated list of statuses (e.g., PENDING,SCHEDULED)
+        - name: propertyId
+          in: query
+          schema:
+            type: string
+        - name: cleanerId
+          in: query
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of cleaning jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CleaningJob'
+    post:
+      summary: Create a new cleaning job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCleaningJob'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningJob'
+    get:
+      summary: Get a cleaning job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningJob'
+        '404':
+          description: Job not found
+    put:
+      summary: Update a cleaning job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCleaningJob'
+      responses:
+        '200':
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleaningJob'
+        '404':
+          description: Job not found
+    delete:
+      summary: Delete (cancel) a cleaning job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deletion successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+    post:
+      summary: Submit checklist for a cleaning job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Checklist'
+      responses:
+        '201':
+          description: Checklist submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+  /api/cleaning/cleaners:
+    get:
+      summary: List available cleaners
+      responses:
+        '200':
+          description: Array of cleaners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cleaner'
+  /api/customers:
+    get:
+      summary: List external customers
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+    post:
+      summary: Create a new external customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomer'
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+  /api/customers/{id}:
+    get:
+      summary: Get a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer not found
+    put:
+      summary: Update a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomer'
+      responses:
+        '200':
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer not found
+    delete:
+      summary: Deactivate a customer by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deactivation successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /api/auth/login:
+    post:
+      summary: Authenticate a user (login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+        '401':
+          description: Authentication failed
+  /api/auth/register:
+    post:
+      summary: Register a new user (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+        '409':
+          description: Email already taken
+components:
+  schemas:
+    Property:
+      type: object
+      required:
+        - id
+        - address
+        - propertyType
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+        address:
+          type: string
+          description: Street address
+        propertyType:
+          type: string
+          enum: [HOUSE, CONDO, TOWNHOUSE, DUPLEX, TRIPLEX, APARTMENT, CABIN]
+        bedrooms:
+          type: number
+          nullable: true
+        bathrooms:
+          type: number
+          nullable: true
+        squareFeet:
+          type: number
+          nullable: true
+        lotSize:
+          type: string
+          enum: [EIGHTH_ACRE, QUARTER_ACRE, HALF_ACRE, ACRE, LARGE, COMMERCIAL]
+        price:
+          type: number
+          description: Nightly rate in USD
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, UNDER_RENOVATION]
+    NewProperty:
+      type: object
+      required:
+        - address
+        - propertyType
+      properties:
+        address:
+          type: string
+        propertyType:
+          type: string
+          enum: [HOUSE, CONDO, TOWNHOUSE, DUPLEX, TRIPLEX, APARTMENT, CABIN]
+        bedrooms:
+          type: number
+          nullable: true
+        bathrooms:
+          type: number
+          nullable: true
+        squareFeet:
+          type: number
+          nullable: true
+        lotSize:
+          type: string
+          enum: [EIGHTH_ACRE, QUARTER_ACRE, HALF_ACRE, ACRE, LARGE, COMMERCIAL]
+        price:
+          type: number
+    PropertyListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        address:
+          type: string
+        price:
+          type: number
+    Booking:
+      type: object
+      required:
+        - id
+        - propertyId
+        - startDate
+        - endDate
+      properties:
+        id:
+          type: string
+          format: uuid
+        propertyId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED]
+        totalCost:
+          type: number
+    NewBooking:
+      type: object
+      required:
+        - propertyId
+        - startDate
+        - endDate
+      properties:
+        propertyId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        guests:
+          type: number
+          nullable: true
+    UpdateBooking:
+      type: object
+      properties:
+        endDate:
+          type: string
+          format: date-time
+        guests:
+          type: number
+          nullable: true
+        status:
+          type: string
+    CleaningJob:
+      type: object
+      required:
+        - id
+        - propertyId
+        - scheduledStart
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        propertyId:
+          type: string
+          format: uuid
+        scheduledStart:
+          type: string
+          format: date-time
+        scheduledEnd:
+          type: string
+          format: date-time
+        cleaningType:
+          type: string
+          enum: [TURNOVER, DEEP_CLEAN, MOVE_IN_OUT, MID_STAY, POST_CONSTRUCTION]
+        status:
+          type: string
+          enum: [PENDING, SCHEDULED, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED, ISSUE_REPORTED, QUALITY_CHECK]
+        cleanerId:
+          type: string
+          nullable: true
+        customerCharge:
+          type: number
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    NewCleaningJob:
+      type: object
+      required:
+        - propertyId
+        - scheduledStart
+        - cleaningType
+      properties:
+        propertyId:
+          type: string
+          format: uuid
+        scheduledStart:
+          type: string
+          format: date-time
+        cleaningType:
+          type: string
+          enum: [TURNOVER, DEEP_CLEAN, MOVE_IN_OUT, MID_STAY, POST_CONSTRUCTION]
+        status:
+          type: string
+          enum: [PENDING, SCHEDULED, ASSIGNED, IN_PROGRESS, COMPLETED, CANCELLED, ISSUE_REPORTED, QUALITY_CHECK]
+        customerCharge:
+          type: number
+        notes:
+          type: string
+          nullable: true
+    UpdateCleaningJob:
+      type: object
+      properties:
+        scheduledEnd:
+          type: string
+          format: date-time
+        status:
+          type: string
+        cleanerId:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+    Checklist:
+      type: object
+      required:
+        - crewId
+        - completedAt
+      properties:
+        crewId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        items:
+          type: object
+          required:
+            - itemId
+            - completed
+          properties:
+            itemId:
+              type: string
+              description: ID of the checklist item
+            completed:
+              type: boolean
+    Customer:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - phone
+        - type
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        company:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [STR_OWNER, PM_COMPANY, RESIDENTIAL, COMMERCIAL]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, CHURNED]
+        stripeCustomerId:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+    NewCustomer:
+      type: object
+      required:
+        - name
+        - phone
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+        company:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [STR_OWNER, PM_COMPANY, RESIDENTIAL, COMMERCIAL]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, CHURNED]
+    CreateCustomer:
+      type: object
+      required:
+        - name
+        - phone
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+    UpdateCustomer:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+        company:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/Customer'

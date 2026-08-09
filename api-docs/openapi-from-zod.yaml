@@ -1,0 +1,261 @@
+#%YAML 1.2
+openapi: 3.0.3
+info:
+  title: CC Ops API
+  version: 1.0.0
+  description: API generated from Zod validation schemas.
+servers:
+  - url: http://localhost:4000
+components:
+  schemas:
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+        state:
+          type: string
+          minLength: 2
+          maxLength: 2
+        zipCode:
+          type: string
+          minLength: 5
+          maxLength: 5
+        type:
+          type: string
+          enum:
+            - HOUSE
+            - CONDO
+            - TOWNHOUSE
+            - DUPLEX
+            - TRIPLEX
+            - APARTMENT
+            - CABIN
+        bedrooms:
+          type: integer
+          minimum: 0
+          maximum: 20
+        bathrooms:
+          type: number
+          minimum: 0
+          maximum: 20
+        maxGuests:
+          type: integer
+          minimum: 1
+          maximum: 50
+        baseRate:
+          type: number
+          minimum: 0
+        cleaningFee:
+          type: number
+          minimum: 0
+        petFee:
+          type: number
+          minimum: 0
+        isPetFriendly:
+          type: boolean
+        hasPool:
+          type: boolean
+        hasHotTub:
+          type: boolean
+        isBeachfront:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - UNDER_RENOVATION
+            - SOLD
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - address
+        - city
+        - state
+        - zipCode
+        - type
+        - bedrooms
+        - bathrooms
+        - maxGuests
+        - baseRate
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        propertyId:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          enum:
+            - AIRBNB
+            - VRBO
+            - BOOKING_COM
+            - DIRECT
+        platformBookingId:
+          type: string
+          nullable: true
+        guestName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        guestEmail:
+          type: string
+          nullable: true
+          format: email
+        guestPhone:
+          type: string
+          nullable: true
+          maxLength: 50
+        guestCount:
+          type: integer
+          minimum: 1
+          maximum: 50
+        petCount:
+          type: integer
+          minimum: 0
+          maximum: 10
+        checkIn:
+          type: string
+          format: date-time
+        checkOut:
+          type: string
+          format: date-time
+        checkInTime:
+          type: string
+        checkoutTime:
+          type: string
+        nightlyRate:
+          type: number
+          minimum: 0
+        totalNights:
+          type: integer
+          minimum: 1
+        subtotal:
+          type: number
+          minimum: 0
+        cleaningFee:
+          type: number
+          minimum: 0
+        petFee:
+          type: number
+          minimum: 0
+        platformFee:
+          type: number
+          minimum: 0
+        totalAmount:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - INQUIRY
+            - CONFIRMED
+            - ACTIVE
+            - COMPLETED
+            - CANCELLED
+            - NO_SHOW
+        source:
+          type: string
+          enum:
+            - AIRBNB
+            - VRBO
+            - BOOKING_COM
+            - DIRECT
+            - REFERRAL
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - propertyId
+        - platform
+        - guestName
+        - guestCount
+        - checkIn
+        - checkOut
+        - nightlyRate
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        email:
+          type: string
+          nullable: true
+          format: email
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 50
+        company:
+          type: string
+          nullable: true
+          maxLength: 200
+        type:
+          type: string
+          enum:
+            - STR_OWNER
+            - PM_COMPANY
+            - RESIDENTIAL
+            - COMMERCIAL
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - CHURNED
+        stripeCustomerId:
+          type: string
+          nullable: true
+          maxLength: 200
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - phone
+  parameters: {}
+paths: {}

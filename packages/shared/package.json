@@ -6,9 +6,12 @@
   "types": "./src/index.ts",
   "scripts": {
     "dev": "echo 'shared — no dev server'",
+    "lint": "eslint . --ext .ts --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts --fix",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "eslint": "^9.0.0",
     "typescript": "^5.4.0"
   }
 }

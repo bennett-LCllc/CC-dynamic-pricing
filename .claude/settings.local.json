@@ -11,10 +11,52 @@
       "Bash(npm ls *)",
       "Bash(npx *)",
       "Bash(pg_isready -h localhost -p 5432)",
-      "Bash(docker compose up *)"
+      "Bash(docker compose up *)",
+      "Bash(python pmf_scorer.py --sample)",
+      "Bash(python portfolio_analyzer.py --sample)",
+      "Bash(python portfolio_analyzer.py)",
+      "Bash(python pmf_scorer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/cc-ops-pmf.json)",
+      "Bash(python portfolio_analyzer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/cc-ops-portfolio.json)",
+      "Bash(/codex-peer-review init *)",
+      "Bash(/Users/michael.bennett@cognitedata.com/.local/bin/codex-peer-review init *)",
+      "Bash(python portfolio_analyzer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/cc-ops-portfolio-post-sunset.json)",
+      "Bash(command -v codex)",
+      "Bash(command -v jq)",
+      "Bash(cat)",
+      "Bash(codex exec *)",
+      "Read(//Users/michael.bennett@cognitedata.com/.claude/skills/c-level-advisor/skills/cpo-advisor/**)",
+      "Bash(python scripts/pmf_scorer.py --file /Users/michael.bennett@cognitedata.com/corpus-christi-ops/c-suite/cc-ops-pmf.json)",
+      "Bash(python scripts/pmf_scorer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/c-suite/cc-ops-pmf.json)",
+      "Bash(python scripts/portfolio_analyzer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/c-suite/cc-ops-portfolio.json)",
+      "Bash(python scripts/portfolio_analyzer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/c-suite/cc-ops-portfolio-post-sunset.json)",
+      "Bash(python scripts/pmf_scorer.py --input /Users/michael.bennett@cognitedata.com/FieldPilot-AI/c-suite/fieldpilot-pmf.json)",
+      "Bash(python scripts/portfolio_analyzer.py --input /Users/michael.bennett@cognitedata.com/FieldPilot-AI/c-suite/fieldpilot-portfolio.json)",
+      "Bash(python scripts/pmf_scorer.py --input /Users/michael.bennett@cognitedata.com/corpus-christi-ops/c-suite/cc-ops-pmf-post-sunset.json)",
+      "Bash(codex --version)",
+      "Bash(jq --version)",
+      "Read(//tmp/**)",
+      "Bash(python3 *)",
+      "WebSearch",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(echo -e \"#!/bin/sh\\\\necho 'Running lint-staged...'\\\\nexec npx --no-install lint-staged\")",
+      "Bash(chmod +x .husky/pre-commit)",
+      "mcp__serena__list_memories",
+      "Bash(grep -E '\\\\.\\(ts|js|tsx|jsx|json|node\\)$')",
+      "Bash(head -n 793 /Users/michael.bennett@cognitedata.com/corpus-christi-ops/api-docs/openapi.yaml)",
+      "Bash(mv /tmp/openapi_fixed.yaml /Users/michael.bennett@cognitedata.com/corpus-christi-ops/api-docs/openapi.yaml)",
+      "Bash(npm i *)",
+      "Bash(npm view *)",
+      "Bash(codex login *)",
+      "Bash(codex auth *)",
+      "Bash(grep -r \"api/v1\\\\|/v1/\" /Users/michael.bennett@cognitedata.com/corpus-christi-ops --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.py\" -not -path \"*/node_modules/*\")",
+      "Bash(chmod u+w *)"
     ]
   },
   "enabledMcpjsonServers": [
     "codegraph"
-  ]
+  ],
+  "skillOverrides": {
+    "call-cognite-function": "name-only"
+  }
 }

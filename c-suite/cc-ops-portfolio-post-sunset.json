@@ -1,0 +1,54 @@
+{
+  "company": "Corpus Christi STR Portfolio Operations (Post-Lawn-Sunset)",
+  "total_engineering_headcount": 8,
+  "products": [
+    {
+      "name": "STR LLC (Short-Term Rental Operations)",
+      "revenue_quarterly": 180000,
+      "revenue_prev_q": 155000,
+      "market_growth_pct": 18.0,
+      "your_market_share": 12.0,
+      "largest_competitor_share": 8.0,
+      "eng_capacity_pct": 50,
+      "d30_retention": 0.52,
+      "nps": 44,
+      "notes": "Core product - property acquisition, booking management, guest experience. High-growth STR market in Corpus Christi. Leading local position."
+    },
+    {
+      "name": "Cleaning LLC (Turnover Cleaning Services)",
+      "revenue_quarterly": 125000,
+      "revenue_prev_q": 108000,
+      "market_growth_pct": 12.0,
+      "your_market_share": 8.0,
+      "largest_competitor_share": 14.0,
+      "eng_capacity_pct": 30,
+      "d30_retention": 0.48,
+      "nps": 41,
+      "notes": "Internal turnover cleaning + external customers. Growth tied to STR occupancy. Checklist/photo verification adds differentiation."
+    },
+    {
+      "name": "CC Pricing Intelligence (White-Label)",
+      "revenue_quarterly": 60000,
+      "revenue_prev_q": 45000,
+      "market_growth_pct": 8.0,
+      "your_market_share": 25.0,
+      "largest_competitor_share": 15.0,
+      "eng_capacity_pct": 10,
+      "d30_retention": 0.75,
+      "nps": 55,
+      "notes": "White-label pricing API for Corpus Christi STR operators. Local data monopoly on seasonal/events/occupancy. Recurring SaaS revenue."
+    },
+    {
+      "name": "STR Tax & Compliance Automation (White-Label)",
+      "revenue_quarterly": 30000,
+      "revenue_prev_q": 22000,
+      "market_growth_pct": 5.0,
+      "your_market_share": 30.0,
+      "largest_competitor_share": 10.0,
+      "eng_capacity_pct": 5,
+      "d30_retention": 0.85,
+      "nps": 60,
+      "notes": "Automated occupancy tax filing, permit renewals, local regulation tracking. Regulatory moat - non-optional recurring need for all operators."
+    }
+  ]
+}

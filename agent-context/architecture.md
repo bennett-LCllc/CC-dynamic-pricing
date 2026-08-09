@@ -1,0 +1,136 @@
+# Architecture Overview
+
+Generated: Tue Aug  4 21:23:08 CDT 2026
+
+## Repository Structure
+
+
+Project Structure (76 files):
+
+├── .claude
+│   └── hooks
+│       └── bridge-check.py (python, 14 symbols)
+├── .serena
+│   └── project.yml (yaml, 0 symbols)
+├── apps
+│   ├── api
+│   │   └── src
+│   │       ├── pricing
+│   │       │   ├── engine.py (python, 13 symbols)
+│   │       │   └── routes.py (python, 19 symbols)
+│   │       └── main.py (python, 7 symbols)
+│   ├── api-node
+│   │   └── src
+│   │       ├── middleware
+│   │       │   └── auth.ts (typescript, 5 symbols)
+│   │       ├── routes
+│   │       │   ├── auth.ts (typescript, 16 symbols)
+│   │       │   ├── bookings.ts (typescript, 14 symbols)
+│   │       │   ├── cleaning.ts (typescript, 17 symbols)
+│   │       │   ├── customers.ts (typescript, 13 symbols)
+│   │       │   ├── dashboard.ts (typescript, 5 symbols)
+│   │       │   ├── financials.ts (typescript, 14 symbols)
+│   │       │   ├── lawn.ts (typescript, 15 symbols)
+│   │       │   ├── messages.ts (typescript, 19 symbols)
+│   │       │   ├── properties.ts (typescript, 12 symbols)
+│   │       │   └── settings.ts (typescript, 10 symbols)
+│   │       ├── services
+│   │       │   ├── auth.ts (typescript, 17 symbols)
+│   │       │   ├── bookings.ts (typescript, 10 symbols)
+│   │       │   ├── cleaning.ts (typescript, 12 symbols)
+│   │       │   ├── customers.ts (typescript, 8 symbols)
+│   │       │   ├── dashboard.ts (typescript, 4 symbols)
+│   │       │   ├── financials.ts (typescript, 13 symbols)
+│   │       │   ├── lawn.ts (typescript, 11 symbols)
+│   │       │   ├── messages.ts (typescript, 16 symbols)
+│   │       │   ├── properties.ts (typescript, 11 symbols)
+│   │       │   └── settings.ts (typescript, 7 symbols)
+│   │       └── index.ts (typescript, 30 symbols)
+│   └── web
+│       ├── src
+│       │   ├── app
+│       │   │   ├── bookings
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx (tsx, 12 symbols)
+│       │   │   │   ├── calendar
+│       │   │   │   │   └── page.tsx (tsx, 30 symbols)
+│       │   │   │   └── page.tsx (tsx, 15 symbols)
+│       │   │   ├── cleaning
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx (tsx, 13 symbols)
+│       │   │   │   └── page.tsx (tsx, 13 symbols)
+│       │   │   ├── customers
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx (tsx, 12 symbols)
+│       │   │   │   └── page.tsx (tsx, 13 symbols)
+│       │   │   ├── financials
+│       │   │   │   └── page.tsx (tsx, 14 symbols)
+│       │   │   ├── lawn
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx (tsx, 12 symbols)
+│       │   │   │   └── page.tsx (tsx, 14 symbols)
+│       │   │   ├── login
+│       │   │   │   └── page.tsx (tsx, 7 symbols)
+│       │   │   ├── messages
+│       │   │   │   └── page.tsx (tsx, 14 symbols)
+│       │   │   ├── pricing
+│       │   │   │   └── page.tsx (tsx, 10 symbols)
+│       │   │   ├── properties
+│       │   │   │   ├── [id]
+│       │   │   │   │   └── page.tsx (tsx, 12 symbols)
+│       │   │   │   └── page.tsx (tsx, 13 symbols)
+│       │   │   ├── settings
+│       │   │   │   └── page.tsx (tsx, 14 symbols)
+│       │   │   ├── layout.tsx (tsx, 9 symbols)
+│       │   │   └── page.tsx (tsx, 15 symbols)
+│       │   ├── components
+│       │   │   ├── bookings
+│       │   │   │   └── BookingForm.tsx (tsx, 13 symbols)
+│       │   │   ├── cleaning
+│       │   │   │   └── CleaningJobForm.tsx (tsx, 10 symbols)
+│       │   │   ├── customers
+│       │   │   │   └── CustomerForm.tsx (tsx, 8 symbols)
+│       │   │   ├── dashboard
+│       │   │   │   ├── AlertsPanel.tsx (tsx, 5 symbols)
+│       │   │   │   ├── LLCSummary.tsx (tsx, 5 symbols)
+│       │   │   │   ├── QuickActions.tsx (tsx, 5 symbols)
+│       │   │   │   ├── RecentActivity.tsx (tsx, 5 symbols)
+│       │   │   │   └── StatsCards.tsx (tsx, 5 symbols)
+│       │   │   ├── financials
+│       │   │   │   └── ExpenseForm.tsx (tsx, 8 symbols)
+│       │   │   ├── lawn
+│       │   │   │   └── LawnJobForm.tsx (tsx, 11 symbols)
+│       │   │   ├── messages
+│       │   │   │   └── MessageThread.tsx (tsx, 10 symbols)
+│       │   │   ├── properties
+│       │   │   │   └── PropertyForm.tsx (tsx, 13 symbols)
+│       │   │   └── shared
+│       │   │       ├── Header.tsx (tsx, 4 symbols)
+│       │   │       ├── PlatformBadge.tsx (tsx, 5 symbols)
+│       │   │       ├── Sidebar.tsx (tsx, 7 symbols)
+│       │   │       └── StatusBadge.tsx (tsx, 7 symbols)
+│       │   └── lib
+│       │       ├── api.ts (typescript, 65 symbols)
+│       │       └── auth-context.tsx (tsx, 7 symbols)
+│       ├── next-env.d.ts (typescript, 1 symbols)
+│       ├── next.config.js (javascript, 2 symbols)
+│       ├── postcss.config.js (javascript, 1 symbols)
+│       └── tailwind.config.ts (typescript, 3 symbols)
+├── packages
+│   ├── db
+│   │   ├── prisma
+│   │   │   └── seed.ts (typescript, 6 symbols)
+│   │   └── index.ts (typescript, 4 symbols)
+│   └── shared
+│       └── src
+│           ├── constants
+│           │   ├── corpus-christi.ts (typescript, 10 symbols)
+│           │   └── index.ts (typescript, 1 symbols)
+│           ├── types
+│           │   └── index.ts (typescript, 78 symbols)
+│           ├── utils
+│           │   ├── index.ts (typescript, 1 symbols)
+│           │   └── pricing.ts (typescript, 7 symbols)
+│           └── index.ts (typescript, 1 symbols)
+└── docker-compose.yml (yaml, 0 symbols)
+

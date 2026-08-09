@@ -1,121 +1,27 @@
+## Observability
 
-# CC Ops — Corpus Christi STR Portfolio Operations Platform
+### Environment Variables
 
-> Full-stack operations platform for managing short-term rental, lawn care, and cleaning businesses.
+| Variable | Description |
+|----------|-------------|
+| `SENTRY_DSN` | Sentry ingest URL. If omitted, error tracking is disabled. |
+| `LOG_LEVEL` | Logging verbosity (`error`, `warn`, `info`, `debug`, `trace`). Default: `info`. |
+| `NODE_ENV` | Process environment; controls metric sampling (`tracesSampleRate`). |
+| `CORRELATION_ID` | Optional override for request‑level correlation ID. |
+| `PROMETHEUS_PULL_INTERVAL` | How often Prometheus should scrape `/metrics` (seconds). Default: `15`. |
 
-## Architecture
+### Local Development
 
-```
-corpus-christi-ops/
-├── apps/
-│   ├── web/          # Next.js 14 dashboard (port 3000)
-│   ├── api/          # FastAPI pricing engine (port 8000)
-│   └── api-node/     # Express.js REST API (port 4000)
-├── packages/
-│   ├── db/           # Prisma schema + client
-│   ├── shared/       # Shared types, constants, utils
-│   └── ui/           # Shared UI components (future)
-└── docker-compose.yml
-```
+1. **Start the API server**  
+   ```bash
+   npm run dev --prefix apps/api-node
+   ```
+2. **View logs** – pino emits structured JSON. In dev you’ll see pretty‑printed output thanks to `pino-pretty`.  
+3. **Check metrics** – `curl http://localhost:4000/metrics | head -n 20` returns the Prometheus metric list.  
+4. **Visualize metrics** – Open Grafana, add a Prometheus data source pointing at `http://localhost:4000/metrics`, then import the dashboard JSON at `grafana/dashboard-observability.json`.  
 
-## Quick Start
+### CI/CD Integration
 
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Start the database
-
-```bash
-docker-compose up -d
-```
-
-### 3. Set up environment
-
-```bash
-cp .env.example .env
-# Edit .env with your database URL:
-# DATABASE_URL="postgresql://ccops:ccops_dev_password@localhost:5432/corpus_christi_ops"
-```
-
-### 4. Initialize the database
-
-```bash
-npm run db:push        # Push schema to database
-npm run db:seed        # Seed sample data
-```
-
-### 5. Start the apps
-
-```bash
-# Terminal 1 — Next.js dashboard
-cd apps/web && npm run dev
-
-# Terminal 2 — FastAPI pricing engine
-cd apps/api && python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-uvicorn src.main:app --reload --port 8000
-
-# Terminal 3 — Node.js API (when ready)
-cd apps/api-node && npm run dev
-```
-
-### 6. Open the dashboard
-
-Navigate to <http://localhost:3000>
-
-## What's Included
-
-### ✅ Built
-
-- **Database schema** — Full Prisma schema covering all 3 LLCs (STR, Lawn, Cleaning)
-- **Pricing engine** — FastAPI service with Corpus Christi-specific seasonal, event, and occupancy-based pricing
-- **Dashboard** — Next.js 14 app with sidebar navigation, stats cards, LLC overview
-- **Pricing page** — Interactive single-night calculator + multi-day forecast
-- **Seed data** — Sample properties, bookings, cleaners, crews, jobs, and expenses
-
-### 🚧 Next (build in this order)
-
-1. **Properties CRUD** — Add/edit/delete properties with photos
-2. **Bookings management** — Calendar view, Airbnb/VRBO sync
-3. **Cleaning scheduler** — Dispatch, checklists, photo verification
-4. **Lawn scheduler** — Route optimization, crew management
-5. **Financial dashboard** — Per-LLC P&L, consolidated view
-6. **Guest messaging** — Automated templates, Airbnb API integration
-7. **Customer management** — External lawn/cleaning customers
-8. **Expense tracking** — Receipt upload, recurring expenses, tax reports
-
-## Tech Stack
-
-| Layer | Tech |
-| --- | --- |
-| Frontend | Next.js 14, React 18, Tailwind CSS |
-| API (data) | Express.js + TypeScript |
-| API (pricing) | FastAPI + Python |
-| Database | PostgreSQL + Prisma ORM |
-| Cache/Queue | Upstash Redis |
-| Auth | NextAuth.js |
-| Charts | Recharts |
-| Icons | Lucide React |
-
-## LLC Structure
-
-The platform manages three separate businesses:
-
-- **STR LLC** — Property acquisition, booking management, guest experience
-- **Lawn LLC** — Lawn maintenance for STR properties (internal) + external customers
-- **Cleaning LLC** — Turnover cleaning for STR properties (internal) + external customers
-
-Each LLC has its own P&L tracking, with a consolidated view that eliminates internal transfers.
-
-## License
-
-# MIT
-
-# CC-dynamic-pricing
-
-dynamic pricing for short term rental homes in Corpus Christi, TX
-
-> > > > > > > 70fe07270c8df937ebad8f5f81485d61a2f96069
+- Export `SENTRY_DSN` in your CI secret store if you want failures captured in Sentry.  
+- Add a health‑check step that `curl`s `/metrics` and verifies a non‑empty response.  
+- No extra steps are required for Sentry or Prometheus when using the default configuration.

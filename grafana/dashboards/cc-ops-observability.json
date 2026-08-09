@@ -1,0 +1,131 @@
+{
+  "dashboard": {
+    "id": 1,
+    "uid": "cc-ops-observability",
+    "title": "CC Ops Observability Stack",
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "HTTP Request Duration (seconds)",
+        "datasource": "Prometheus",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, code)",
+            "legendFormat": "p50 ({code})",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.9, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, code)",
+            "legendFormat": "p95 ({code})",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, code)",
+            "legendFormat": "p99 ({code})",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          { "format": "s", "label": "Seconds", "logBase": 1, "min": 0 },
+          { "format": "short", "show": false }
+        ],
+        "lines": true,
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": { "shared": true, "sort": 0 }
+      },
+      {
+        "type": "stat",
+        "title": "Total HTTP Requests (rate)",
+        "datasource": "Prometheus",
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "req/s",
+            "refId": "A"
+          }
+        ],
+        "mode": "value",
+        "options": {
+          "colorMode": "value",
+          "mode": "inline",
+          "reductions": { "values": false, "calcs": ["last"] },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "5xx Errors (rate)",
+        "datasource": "Prometheus",
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{code=~\"5..\"}[5m])",
+            "legendFormat": "5xx",
+            "refId": "A"
+          }
+        ],
+        "mode": "value",
+        "options": {
+          "colorMode": "value",
+          "mode": "inline",
+          "reductions": { "values": false, "calcs": ["last"] },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "state": "ok"
+      },
+      {
+        "type": "log",
+        "title": "Sentry Error Events (last 5m)",
+        "datasource": "Sentry",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "refId": "A",
+            "query": "count(errors)",
+            "bucketAggs": [
+              {
+                "type": "time_buckets",
+                "time_bucket": {
+                  "interval": "5m",
+                  "field": "event.timestamp",
+                  "field_type": "time"
+                }
+              }
+            ],
+            "groupBy": [
+              "event.timestamp"
+            ]
+          }
+        ],
+        "maxLines": 1000,
+        "showLabels": false,
+        "showTime": true,
+        "sort": "timestampDesc"
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    }
+  },
+  "overwrite": true
+}
