@@ -33,4 +33,4 @@ npm-debug.log*
 
 # Prisma
 prisma/migrations
-agent-context/tags
+agent-context

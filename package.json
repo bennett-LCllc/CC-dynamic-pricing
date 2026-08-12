@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "generate:openapi": "ts-node scripts/generate-openapi.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "true"
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^7.0.0",

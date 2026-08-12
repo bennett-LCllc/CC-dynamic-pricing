@@ -86,3 +86,7 @@
 4. **Check coverage thresholds** – the CI will fail if any threshold drops below 80 %.
 
 All modifications are tracked in `CC_OPS_TUNEUP.MD` and the updated `package.json`, `.husky/pre-commit`, `vitest.config.ts`, and ESLint/Prettier configs.
+
+## 7. Git History Cleanup
+
+- Removed large generated `agent-context/tags` file (~300 MB) from repository history to satisfy GitHub's 100 MB file size limit. Used the BFG tool to rewrite history and force‑push the cleaned branch. The `agent-context/` directory is now listed in `.gitignore` to prevent future accidental tracking.
