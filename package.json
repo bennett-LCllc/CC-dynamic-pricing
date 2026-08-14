@@ -4,7 +4,9 @@
   "scripts": {
     "generate:openapi": "ts-node scripts/generate-openapi.ts",
     "test": "vitest",
-    "lint": "true"
+    "lint": "true",
+    "build": "echo 'Build step placeholder' && exit 0",
+    "type-check": "echo 'Type-check step placeholder' && exit 0"
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^7.0.0",
