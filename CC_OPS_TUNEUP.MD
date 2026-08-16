@@ -37,6 +37,10 @@
 - Added `lint-staged` configuration block for automatic code quality enforcement.
 
 ### 6. OpenAPI Generation (2026-08-05)
+
+- Updated all CI workflows (`.github/workflows/ci.yml`) to pin Node.js version `24.6.2` via the `actions/setup-node` action.
+- Added `"engines": { "node": ">=24" }` to `package.json` to declare the project's supported Node version.
+- Created a `.node-version` file at the repository root containing `24.6.2` for developer version managers.
 - Added `@asteasolutions/zod-to-openapi` v7 and `zod` v3.23.8 as devDependencies.
 - Updated `scripts/generate-openapi.ts` to use the modern `@asteasolutions/zod-to-openapi` API with `extendZodWithOpenApi` and `OpenApiGeneratorV3`.
 - Ran `npm install` successfully.
@@ -68,6 +72,11 @@
   - Introduce route prefixing (`/v1/…`, `/v2/…`) for backward‑compatible changes.
   - Add a versioning strategy document outlining deprecation timelines and migration steps.
   - Update CI to verify that versioned routes remain functional.
+
+- **CI/CD Pipeline Updates**
+  - Fixed GitHub Actions workflow to pin actions to specific commit SHAs.
+  - Replaced placeholder lint/type‑check/build scripts with real implementations.
+  - Resolved all peer‑review findings and confirmed the workflow now passes validation.
 
 ---
 
