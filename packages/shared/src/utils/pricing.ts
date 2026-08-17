@@ -1,10 +1,10 @@
 import {
-  SEASONAL_MULTIPLIERS,
   DOW_MULTIPLIERS,
   MAJOR_EVENTS,
   PRICING_FLOORS,
+  SEASONAL_MULTIPLIERS,
 } from '../constants/corpus-christi.js';
-import type { PricingFactors, CompetitorRate } from '../types/index.js';
+import type { CompetitorRate, PricingFactors } from '../types/index.js';
 
 /**
  * Calculate the dynamic nightly rate for a property on a given date.
@@ -48,29 +48,23 @@ export function calculateNightlyRate(params: {
   }
 
   // 4. Occupancy urgency — raise rates when nearly booked, discount to fill gaps
-  let occupancyMultiplier = 1.0;
-  if (upcomingOccupancyRate >= 0.9) {
-    occupancyMultiplier = 1.30; // Nearly sold out → premium pricing
-  } else if (upcomingOccupancyRate >= 0.8) {
-    occupancyMultiplier = 1.15; // High demand → slight premium
-  } else if (upcomingOccupancyRate >= 0.5) {
-    occupancyMultiplier = 1.0;  // Normal
-  } else if (upcomingOccupancyRate >= 0.3) {
-    occupancyMultiplier = 0.90; // Below target → slight discount
-  } else {
-    occupancyMultiplier = 0.80; // Significant gap → aggressive discount
-  }
+  const occupancyMultiplier =
+    upcomingOccupancyRate >= 0.9
+      ? 1.3 // Nearly sold out → premium pricing
+      : upcomingOccupancyRate >= 0.8
+        ? 1.15 // High demand → slight premium
+        : upcomingOccupancyRate >= 0.5
+          ? 1.0 // Normal
+          : upcomingOccupancyRate >= 0.3
+            ? 0.9 // Below target → slight discount
+            : 0.8; // Significant gap → aggressive discount
 
   // 5. Calculate pre-discount rate
   const calculatedRate =
-    baseRate *
-    seasonalMultiplier *
-    dowMultiplier *
-    eventMultiplier *
-    occupancyMultiplier;
+    baseRate * seasonalMultiplier * dowMultiplier * eventMultiplier * occupancyMultiplier;
 
   // 6. Apply discounts (stacks, but capped)
-  const totalDiscount = Math.min(minStayDiscount + earlyBirdDiscount, 0.20); // Max 20% discount
+  const totalDiscount = Math.min(minStayDiscount + earlyBirdDiscount, 0.2); // Max 20% discount
   const discountedRate = calculatedRate * (1 - totalDiscount);
 
   // 7. Apply floor/ceiling based on property type
@@ -115,7 +109,12 @@ export function generatePricingForecast(params: {
     days = 30,
   } = params;
 
-  const forecast: Array<{ date: string; rate: number; factors: PricingFactors; isBooked: boolean }> = [];
+  const forecast: Array<{
+    date: string;
+    rate: number;
+    factors: PricingFactors;
+    isBooked: boolean;
+  }> = [];
 
   for (let i = 0; i < days; i++) {
     const date = new Date(startDate);
@@ -123,7 +122,7 @@ export function generatePricingForecast(params: {
 
     // Check if date falls within an existing booking
     const isBooked = existingBookings.some(
-      (booking) => date >= booking.checkIn && date < booking.checkOut
+      (booking) => date >= booking.checkIn && date < booking.checkOut,
     );
 
     // Calculate occupancy rate for next 14 days
@@ -164,7 +163,10 @@ export function estimateCompetitorRates(params: {
 }): CompetitorRate {
   // TODO: Replace with actual Airbnb market data integration
   // For now, return Corpus Christi averages
-  const baseEstimates: Record<number, { avg: number; p25: number; p50: number; p75: number; p90: number }> = {
+  const baseEstimates: Record<
+    number,
+    { avg: number; p25: number; p50: number; p75: number; p90: number }
+  > = {
     1: { avg: 110, p25: 80, p50: 105, p75: 130, p90: 170 },
     2: { avg: 175, p25: 130, p50: 165, p75: 210, p90: 280 },
     3: { avg: 240, p25: 180, p50: 225, p75: 290, p90: 380 },
@@ -195,9 +197,8 @@ export function calculatePropertyMetrics(params: {
 }) {
   const { bookings, periodStart, periodEnd, totalNightsInPeriod } = params;
 
-  const periodBookings = bookings.filter(
-    (b) => b.checkIn >= periodStart && b.checkIn < periodEnd
-  );
+  // Include any booking that overlaps with the period
+  const periodBookings = bookings.filter((b) => b.checkIn < periodEnd && b.checkOut > periodStart);
 
   const revenue = periodBookings.reduce((sum, b) => sum + b.totalAmount, 0);
   const nights = periodBookings.reduce((sum, b) => {
