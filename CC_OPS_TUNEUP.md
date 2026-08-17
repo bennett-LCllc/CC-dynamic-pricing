@@ -3,11 +3,13 @@
 ## Completed Updates
 
 ### 1. TypeScript Strict Mode Enforcement
+
 - Updated `tsconfig.json` (root and per-package) with `strict: true` and individual strict options (`noImplicitAny`, `strictNullChecks`, `exactOptionalPropertyTypes`).
 - Added `"typescript.sandbox": false` to prevent accidental sandbox usage.
 - Fixed `packages/db/index.ts` to resolve `process.env` access for `noPropertyAccessFromIndexSignature`.
 
 ### 2. ESLint & Prettier Integration
+
 - Added root `.eslintrc.cjs` with full strict TypeScript plugin configuration, including:
   - `@typescript-eslint/strict-boolean-expressions`
   - `@typescript-eslint/explicit-function-return-type`
@@ -17,11 +19,13 @@
 - Added `"format"` and `"format:check"` scripts to `package.json`.
 
 ### 3. Lint‑Staged & Pre‑Commit Hook
+
 - Configured `lint-staged` to run ESLint `--fix` and Prettier on staged `*.ts, *.tsx, *.js, *.jsx` files.
 - Added a `prepare` script placeholder to facilitate automatic husky installation.
 - Created a pre‑commit hook (`.husky/pre-commit`) that executes `npx --no-install lint-staged`.
 
 ### 4. Test Coverage Foundation
+
 - Added **Vitest** to the tech stack:
   - `vitest` as the test runner.
   - `vitest.config.ts` with coverage thresholds (80 % for statements/branches/functions/lines) and reporting.
@@ -32,6 +36,7 @@
   - Introduced a sample test in `packages/shared/src/__tests__/someUtility.test.ts`.
 
 ### 5. Package.json Enhancements
+
 - Integrated new dev dependencies: `husky`, `lint-staged`, `vitest`, `@vitest/coverage-v8`, plus existing ESLint/Prettier packages.
 - Updated scripts section to expose the new test and format commands.
 - Added `lint-staged` configuration block for automatic code quality enforcement.
@@ -81,12 +86,13 @@
 ---
 
 ### How to Verify the Changes
-1. **Run lint & format**  
+
+1. **Run lint & format**
    ```bash
    npm run lint:fix   # Fixes ESLint issues
    npm run format     # Runs Prettier
    ```
-2. **Run tests & coverage**  
+2. **Run tests & coverage**
    ```bash
    npm test               # Run Vitest
    npm run test:coverage  # Generate coverage report
