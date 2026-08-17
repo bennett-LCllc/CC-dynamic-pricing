@@ -1,4 +1,10 @@
 module.exports = {
-  "*.{js,jsx,ts,tsx}": ["node_modules/.bin/eslint --fix"],
-  "*.{json,md}": ["node_modules/.bin/prettier --write"],
+  "*.{js,jsx,ts,tsx}": [
+    "prettier --write"
+  ],
+  "*.{json,md}": [
+    "prettier --write"
+  ],
+  // Optional: type-check if TS project
+  // "*.ts?(x)": ["npx tsc --noEmit"],
 };
