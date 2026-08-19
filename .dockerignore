@@ -1,0 +1,21 @@
+# Node & build artefacts
+node_modules/
+dist/
+build/
+*.log
+
+# Git metadata
+.git/
+.gitignore
+
+# Fly & CI artefacts
+fly.toml
+Dockerfile
+apps/api-node/fly.toml
+*.md
+*.log
+
+# Large unrelated files
+bfg.jar
+*.jar
+*.pyc
