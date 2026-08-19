@@ -77,16 +77,25 @@ export function captureException(error: Error, context?: Record<string, any>) {
 /**
  * Capture a message with level
  */
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
+export function captureMessage(
+  message: string,
+  level: Sentry.SeverityLevel = 'info',
+  context?: Record<string, any>,
+) {
   if (SENTRY_DSN) {
-    Sentry.captureMessage(message, level, { extra: context });
+    Sentry.withScope((scope) => {
+      if (context) scope.setExtras(context);
+      Sentry.captureMessage(message, level);
+    });
   }
 }
 
 /**
  * Set user context for Sentry
  */
-export function setUserContext(user: { id: string; email?: string; username?: string; [key: string]: any } | null) {
+export function setUserContext(
+  user: { id: string; email?: string; username?: string; [key: string]: any } | null,
+) {
   if (SENTRY_DSN) {
     Sentry.setUser(user);
   }
@@ -106,7 +115,7 @@ export function addBreadcrumb(breadcrumb: Sentry.Breadcrumb) {
  */
 export function startTransaction(name: string, op: string) {
   if (SENTRY_DSN) {
-    return Sentry.startSpan({ name, op });
+    return Sentry.startTransaction({ name, op });
   }
   return null;
 }

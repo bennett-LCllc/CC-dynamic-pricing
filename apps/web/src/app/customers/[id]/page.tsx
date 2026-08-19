@@ -1,20 +1,23 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import CustomerForm from '@/components/customers/CustomerForm';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { deleteCustomer, getCustomer } from '@/lib/api';
+import type { Customer } from '@cc-ops/shared';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Edit3,
+  Loader2,
+  Mail,
+  Phone,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  getCustomer,
-  deleteCustomer,
-} from '@/lib/api';
-import type { Customer } from '@cc-ops/shared';
-import CustomerForm from '@/components/customers/CustomerForm';
-import {
-  ArrowLeft, Edit3, Trash2, Mail, Phone, Building2,
-  MapPin, Calendar, DollarSign, Loader2, AlertTriangle,
-  ClipboardList, ExternalLink,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { use, useEffect, useState } from 'react';
 
 const TYPE_LABELS: Record<string, string> = {
   STR_OWNER: 'STR Owner',
@@ -23,11 +26,7 @@ const TYPE_LABELS: Record<string, string> = {
   COMMERCIAL: 'Commercial',
 };
 
-export default function CustomerDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
 
@@ -81,7 +80,10 @@ export default function CustomerDetailPage({
           <AlertTriangle className="w-4 h-4 shrink-0" />
           {error}
         </div>
-        <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-ocean-600 mt-4 hover:underline">
+        <Link
+          href="/customers"
+          className="inline-flex items-center gap-1 text-sm text-ocean-600 mt-4 hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to Customers
         </Link>
@@ -95,7 +97,10 @@ export default function CustomerDetailPage({
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
           Customer not found.
         </div>
-        <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-ocean-600 mt-4 hover:underline">
+        <Link
+          href="/customers"
+          className="inline-flex items-center gap-1 text-sm text-ocean-600 mt-4 hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to Customers
         </Link>
@@ -114,10 +119,7 @@ export default function CustomerDetailPage({
       <div className="bg-white border-b border-border px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/customers"
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+            <Link href="/customers" className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
@@ -203,9 +205,13 @@ export default function CustomerDetailPage({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Address</th>
+                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">
+                      Address
+                    </th>
                     <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Type</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Lot Size</th>
+                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">
+                      Lot Size
+                    </th>
                     <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Lawn</th>
                     <th className="text-left py-2 font-medium text-muted-foreground">Cleaning</th>
                   </tr>
@@ -218,9 +224,15 @@ export default function CustomerDetailPage({
                         <div className="text-xs text-muted-foreground">{prop.zipCode}</div>
                       </td>
                       <td className="py-3 pr-4 capitalize">{prop.propertyType.toLowerCase()}</td>
-                      <td className="py-3 pr-4">{prop.lotSize?.replace(/_/g, ' ').toLowerCase()}</td>
-                      <td className="py-3 pr-4">{prop.lawnPackage?.replace(/_/g, ' ').toLowerCase() ?? '-'}</td>
-                      <td className="py-3">{prop.cleaningPackage?.replace(/_/g, ' ').toLowerCase() ?? '-'}</td>
+                      <td className="py-3 pr-4">
+                        {prop.lotSize?.replace(/_/g, ' ').toLowerCase()}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {prop.lawnPackage?.replace(/_/g, ' ').toLowerCase() ?? '-'}
+                      </td>
+                      <td className="py-3">
+                        {prop.cleaningPackage?.replace(/_/g, ' ').toLowerCase() ?? '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -248,7 +260,10 @@ export default function CustomerDetailPage({
             {lawnJobs.length > 0 ? (
               <div className="space-y-2">
                 {lawnJobs.slice(0, 10).map((job) => (
-                  <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={job.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div>
                       <div className="text-sm font-medium">{job.propertyAddress}</div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
@@ -258,12 +273,17 @@ export default function CustomerDetailPage({
                           day: 'numeric',
                           year: 'numeric',
                         })}
-                        <span className="capitalize">{job.serviceType.toLowerCase().replace(/_/g, ' ')}</span>
+                        <span className="capitalize">
+                          {job.serviceType.toLowerCase().replace(/_/g, ' ')}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium">
-                        ${Number(job.customerCharge).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        $
+                        {Number(job.customerCharge).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
                       <StatusBadge status={job.status} variant="booking" />
                     </div>
@@ -288,14 +308,18 @@ export default function CustomerDetailPage({
               </h3>
               {totalCleaningRevenue > 0 && (
                 <span className="text-sm font-medium text-ocean-600">
-                  ${totalCleaningRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })} total
+                  ${totalCleaningRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}{' '}
+                  total
                 </span>
               )}
             </div>
             {cleaningJobs.length > 0 ? (
               <div className="space-y-2">
                 {cleaningJobs.slice(0, 10).map((job) => (
-                  <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={job.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div>
                       <div className="text-sm font-medium">{job.propertyAddress}</div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
@@ -305,12 +329,17 @@ export default function CustomerDetailPage({
                           day: 'numeric',
                           year: 'numeric',
                         })}
-                        <span className="capitalize">{job.cleaningType.toLowerCase().replace(/_/g, ' ')}</span>
+                        <span className="capitalize">
+                          {job.cleaningType.toLowerCase().replace(/_/g, ' ')}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium">
-                        ${Number(job.customerCharge).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        $
+                        {Number(job.customerCharge).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
                       <StatusBadge status={job.status} variant="booking" />
                     </div>
@@ -346,7 +375,8 @@ export default function CustomerDetailPage({
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
               <h3 className="text-lg font-semibold mb-2">Deactivate Customer</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Are you sure you want to deactivate <strong>{customer.name}</strong>? They will be marked as inactive and hidden from default views.
+                Are you sure you want to deactivate <strong>{customer.name}</strong>? They will be
+                marked as inactive and hidden from default views.
               </p>
               <div className="flex items-center justify-end gap-3">
                 <button

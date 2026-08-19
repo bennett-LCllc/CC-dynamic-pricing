@@ -1,3 +1,89 @@
+# CC-Ops Tune-up Log
+
+## 2026-08-17 — GitHub Actions Test Failure Fix
+
+### Problem
+GitHub Actions failed with:
+```
+Error: Cannot find module '../someUtility' imported from packages/shared/src/__tests__/someUtility.test.ts
+```
+
+The test file was a placeholder importing a non-existent `someUtility` module.
+
+### Root Cause
+- `packages/shared/src/__tests__/someUtility.test.ts` imported `'../someUtility'` which didn't exist
+- No actual `someUtility.ts` file in `packages/shared/src/`
+
+### Fixes Applied
+
+#### 1. Rewrote test file with real tests
+**File:** `packages/shared/src/__tests__/someUtility.test.ts`
+
+Added 11 comprehensive tests for actual pricing utilities:
+- **calculateNightlyRate** (5 tests): base params, seasonal multipliers, DOW multipliers, floors/ceilings, occupancy discounts
+- **generatePricingForecast** (3 tests): default 30-day forecast, booked days handling, custom day count
+- **calculatePropertyMetrics** (3 tests): revenue/occupancy calculation, bookings outside period, partial overlaps
+
+#### 2. Fixed bug in calculatePropertyMetrics
+**File:** `packages/shared/src/utils/pricing.ts`
+
+**Before:** Only included bookings that *started* in the period
+```typescript
+const periodBookings = bookings.filter(
+  (b) => b.checkIn >= periodStart && b.checkIn < periodEnd
+);
+```
+
+**After:** Includes any booking overlapping the period
+```typescript
+const periodBookings = bookings.filter(
+  (b) => b.checkIn < periodEnd && b.checkOut > periodStart
+);
+```
+
+#### 3. Fixed lint warning
+**File:** `packages/shared/src/utils/pricing.ts`
+
+Refactored `occupancyMultiplier` from `let` + if/else chain to `const` + ternary chain:
+```typescript
+const occupancyMultiplier =
+  upcomingOccupancyRate >= 0.9 ? 1.30 :
+  upcomingOccupancyRate >= 0.8 ? 1.15 :
+  upcomingOccupancyRate >= 0.5 ? 1.00 :
+  upcomingOccupancyRate >= 0.3 ? 0.90 :
+  0.80;
+```
+
+#### 4. Updated ESLint config for ESLint 10 (flat config)
+- **Removed:** `eslint.config.cjs` (used deprecated `env` key)
+- **Created:** `eslint.config.mjs` with proper flat config
+- **Installed:** `@eslint/js`, `typescript-eslint` dev dependencies
+
+### Verification
+All checks pass:
+- ✅ 11/11 tests pass (vitest)
+- ✅ Lint passes (shared package)
+- ✅ Typecheck passes (shared package)
+- ✅ Root lint/typecheck pass
+
+### Commit
+```
+8a10397 fix: resolve GitHub Actions test failure
+```
+
+### Files Changed
+- `packages/shared/src/__tests__/someUtility.test.ts` (rewritten)
+- `packages/shared/src/utils/pricing.ts` (bug fix + lint fix)
+- `eslint.config.cjs` (deleted)
+- `eslint.config.mjs` (created)
+- `package.json` (added @eslint/js, typescript-eslint)
+- `package-lock.json` (updated)
+
+---
+
+
+---
+
 # CC Ops Tune-Up Summary
 
 ## Completed Updates

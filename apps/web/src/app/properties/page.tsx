@@ -1,15 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import PropertyForm from '@/components/properties/PropertyForm';
 import { Header } from '@/components/shared/Header';
 import { getProperties } from '@/lib/api';
 import type { PropertyListItem } from '@cc-ops/shared';
-import PropertyForm from '@/components/properties/PropertyForm';
-import {
-  Building2, Plus, MapPin, Bed, Bath, Users, DollarSign,
-  TrendingUp,
-} from 'lucide-react';
+import { Bath, Bed, Building2, MapPin, Plus, TrendingUp, Users } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -24,7 +21,9 @@ function StatusBadge({ status }: { status: string }) {
     UNDER_RENOVATION: 'Renovating',
     SOLD: 'Sold',
   };
-  return <span className={`badge ${styles[status] ?? 'badge-info'}`}>{labels[status] ?? status}</span>;
+  return (
+    <span className={`badge ${styles[status] ?? 'badge-info'}`}>{labels[status] ?? status}</span>
+  );
 }
 
 function PropertyCard({ property }: { property: PropertyListItem }) {
@@ -39,7 +38,9 @@ function PropertyCard({ property }: { property: PropertyListItem }) {
             </h3>
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
               <MapPin className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{property.address}, {property.zipCode}</span>
+              <span className="truncate">
+                {property.address}, {property.zipCode}
+              </span>
             </div>
           </div>
           <StatusBadge status={property.status} />
@@ -56,9 +57,15 @@ function PropertyCard({ property }: { property: PropertyListItem }) {
           <span className="flex items-center gap-1">
             <Users className="w-3.5 h-3.5" /> {property.maxGuests}
           </span>
-          {property.hasPool && <span className="text-xs bg-ocean-50 text-ocean-600 px-1.5 py-0.5 rounded">Pool</span>}
-          {property.isPetFriendly && <span className="text-xs bg-palm-50 text-palm-600 px-1.5 py-0.5 rounded">Pets</span>}
-          {property.isBeachfront && <span className="text-xs bg-sand-50 text-sand-600 px-1.5 py-0.5 rounded">Beach</span>}
+          {property.hasPool && (
+            <span className="text-xs bg-ocean-50 text-ocean-600 px-1.5 py-0.5 rounded">Pool</span>
+          )}
+          {property.isPetFriendly && (
+            <span className="text-xs bg-palm-50 text-palm-600 px-1.5 py-0.5 rounded">Pets</span>
+          )}
+          {property.isBeachfront && (
+            <span className="text-xs bg-sand-50 text-sand-600 px-1.5 py-0.5 rounded">Beach</span>
+          )}
         </div>
 
         {/* Financials */}
@@ -69,7 +76,9 @@ function PropertyCard({ property }: { property: PropertyListItem }) {
           </div>
           <div>
             <div className="text-xs text-muted-foreground">MTD Revenue</div>
-            <div className="font-semibold text-foreground">${property.revenueThisMonth.toLocaleString()}</div>
+            <div className="font-semibold text-foreground">
+              ${property.revenueThisMonth.toLocaleString()}
+            </div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Occupancy</div>
@@ -142,9 +151,7 @@ export default function PropertiesPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <TrendingUp className="w-4 h-4" />
-              <span>
-                {properties.filter((p) => p.status === 'ACTIVE').length} active
-              </span>
+              <span>{properties.filter((p) => p.status === 'ACTIVE').length} active</span>
             </div>
           </div>
           <button
@@ -159,7 +166,9 @@ export default function PropertiesPage() {
         {/* Content */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
+            {[1, 2, 3].map((i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
         ) : properties.length === 0 ? (
           <div className="card p-12 text-center">

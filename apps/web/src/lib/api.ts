@@ -7,51 +7,48 @@ const PRICING_API_URL = process.env.NEXT_PUBLIC_PRICING_API_URL || 'http://local
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 import type {
-  PropertyListItem,
-  Property,
-  CreatePropertyInput,
-  UpdatePropertyInput,
-  Booking,
-  CreateBookingInput,
-  UpdateBookingInput,
-  CleaningJob,
-  CleaningJobSummary,
-  CreateCleaningJobInput,
-  UpdateCleaningJobInput,
-  CleaningJobFilters,
-  CleaningChecklist,
-  Cleaner,
-  LawnJob,
-  LawnJobSummary,
-  CreateLawnJobInput,
-  UpdateLawnJobInput,
-  LawnJobFilters,
-  LawnCrew,
-  Expense,
-  CreateExpenseInput,
-  UpdateExpenseInput,
-  ExpenseFilters,
-  FinancialOverview,
-  ExpenseBreakdown,
-  MessageTemplate,
-  CreateMessageTemplateInput,
-  UpdateMessageTemplateInput,
-  GuestMessage,
-  CreateMessageInput,
-  UpdateMessageInput,
-  MessageFilters,
-  Customer,
-  CustomerSummary,
-  CreateCustomerInput,
-  UpdateCustomerInput,
-  CustomerFilters,
-  User,
   AuthLoginInput,
   AuthRegisterInput,
   AuthResponse,
-  UpdateUserInput,
+  Booking,
+  Cleaner,
+  CleaningChecklist,
+  CleaningJob,
+  CleaningJobFilters,
+  CleaningJobSummary,
+  CreateBookingInput,
+  CreateCleaningJobInput,
+  CreateCustomerInput,
+  CreateExpenseInput,
+  CreateLawnJobInput,
+  CreateMessageInput,
+  CreateMessageTemplateInput,
+  CreatePropertyInput,
+  Customer,
+  CustomerFilters,
+  CustomerSummary,
+  Expense,
+  ExpenseFilters,
+  FinancialOverview,
+  GuestMessage,
+  LawnCrew,
+  LawnJob,
+  LawnJobFilters,
+  MessageFilters,
+  MessageTemplate,
+  Property,
+  PropertyListItem,
   SettingEntry,
   SettingsMap,
+  UpdateBookingInput,
+  UpdateCleaningJobInput,
+  UpdateCustomerInput,
+  UpdateExpenseInput,
+  UpdateLawnJobInput,
+  UpdateMessageTemplateInput,
+  UpdatePropertyInput,
+  UpdateUserInput,
+  User,
 } from '@cc-ops/shared';
 
 function getAuthToken(): string | null {
@@ -350,7 +347,10 @@ export async function createCleaningJob(data: CreateCleaningJobInput): Promise<C
   return json.data;
 }
 
-export async function updateCleaningJob(id: string, data: UpdateCleaningJobInput): Promise<CleaningJob> {
+export async function updateCleaningJob(
+  id: string,
+  data: UpdateCleaningJobInput,
+): Promise<CleaningJob> {
   const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -373,7 +373,10 @@ export async function deleteCleaningJob(id: string): Promise<CleaningJob> {
   return json.data;
 }
 
-export async function submitCleaningChecklist(jobId: string, tasks: Record<string, boolean>): Promise<CleaningChecklist> {
+export async function submitCleaningChecklist(
+  jobId: string,
+  tasks: Record<string, boolean>,
+): Promise<CleaningChecklist> {
   const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/checklist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -387,7 +390,10 @@ export async function submitCleaningChecklist(jobId: string, tasks: Record<strin
   return json.data;
 }
 
-export async function addCleaningPhoto(jobId: string, data: { url: string; category?: string; sortOrder?: number }) {
+export async function addCleaningPhoto(
+  jobId: string,
+  data: { url: string; category?: string; sortOrder?: number },
+) {
   const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/photos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -489,7 +495,7 @@ export async function getFinancialOverview(): Promise<FinancialOverview> {
 }
 
 export async function getLLCFinancials(
-  type: 'STR' | 'LAWN' | 'CLEANING'
+  type: 'STR' | 'LAWN' | 'CLEANING',
 ): Promise<{ revenue: number; expenses: number; netIncome: number }> {
   const res = await fetch(`${API_URL}/api/financials/llc/${type}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -557,7 +563,9 @@ export async function getMessageTemplates(): Promise<MessageTemplate[]> {
   return json.data;
 }
 
-export async function createMessageTemplate(data: CreateMessageTemplateInput): Promise<MessageTemplate> {
+export async function createMessageTemplate(
+  data: CreateMessageTemplateInput,
+): Promise<MessageTemplate> {
   const res = await fetch(`${API_URL}/api/messages/templates`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -571,7 +579,10 @@ export async function createMessageTemplate(data: CreateMessageTemplateInput): P
   return json.data;
 }
 
-export async function updateMessageTemplate(id: string, data: UpdateMessageTemplateInput): Promise<MessageTemplate> {
+export async function updateMessageTemplate(
+  id: string,
+  data: UpdateMessageTemplateInput,
+): Promise<MessageTemplate> {
   const res = await fetch(`${API_URL}/api/messages/templates/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

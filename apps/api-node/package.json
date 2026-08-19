@@ -14,8 +14,8 @@
   "dependencies": {
     "@cc-ops/db": "*",
     "@cc-ops/shared": "*",
-    "@sentry/node": "^8.0.0",
-    "@sentry/tracing": "^8.0.0",
+    "@sentry/node": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",

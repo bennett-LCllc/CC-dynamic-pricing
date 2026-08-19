@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Building2, Sparkles, TreePine, CalendarDays } from 'lucide-react';
+import { Building2, CalendarDays, Sparkles, TreePine } from 'lucide-react';
 import Link from 'next/link';
 
 const actions = [

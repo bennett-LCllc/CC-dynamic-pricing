@@ -1,24 +1,29 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import BookingForm from '@/components/bookings/BookingForm';
+import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { deleteBooking, getBooking } from '@/lib/api';
+import type { Booking } from '@cc-ops/shared';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Bed,
+  Calendar,
+  Clock,
+  Edit3,
+  Loader2,
+  Mail,
+  PawPrint,
+  Phone,
+  Trash2,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getBooking, deleteBooking } from '@/lib/api';
-import type { Booking } from '@cc-ops/shared';
-import BookingForm from '@/components/bookings/BookingForm';
-import {
-  ArrowLeft, Edit3, Trash2, MapPin, User, Mail, Phone,
-  Calendar, DollarSign, Bed, PawPrint, Clock, Loader2,
-  AlertTriangle, CheckCircle2,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { use, useEffect, useState } from 'react';
 
-export default function BookingDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
 
@@ -77,11 +82,7 @@ export default function BookingDetailPage({
   }
 
   if (!booking) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        Booking not found.
-      </div>
-    );
+    return <div className="p-8 text-center text-muted-foreground">Booking not found.</div>;
   }
 
   const checkIn = new Date(booking.checkIn);
@@ -102,10 +103,7 @@ export default function BookingDetailPage({
       <div className="bg-white border-b border-border px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/bookings"
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
+            <Link href="/bookings" className="p-2 hover:bg-muted rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Link>
             <div>
@@ -153,9 +151,7 @@ export default function BookingDetailPage({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="stat-card">
             <div className="stat-label">Total Amount</div>
-            <div className="stat-value">
-              ${Number(booking.totalAmount).toLocaleString()}
-            </div>
+            <div className="stat-value">${Number(booking.totalAmount).toLocaleString()}</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Nightly Rate</div>
@@ -275,21 +271,15 @@ export default function BookingDetailPage({
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Source</div>
-                    <div className="font-medium text-sm mt-1">
-                      {booking.source}
-                    </div>
+                    <div className="font-medium text-sm mt-1">{booking.source}</div>
                   </div>
                 </div>
               </div>
 
               {booking.platformBookingId && (
                 <div className="pt-2 border-t border-border">
-                  <div className="text-xs text-muted-foreground">
-                    Platform Booking ID
-                  </div>
-                  <div className="font-mono text-sm mt-0.5">
-                    {booking.platformBookingId}
-                  </div>
+                  <div className="text-xs text-muted-foreground">Platform Booking ID</div>
+                  <div className="font-mono text-sm mt-0.5">{booking.platformBookingId}</div>
                 </div>
               )}
             </div>
@@ -304,24 +294,18 @@ export default function BookingDetailPage({
               <span className="text-muted-foreground">
                 ${Number(booking.nightlyRate).toLocaleString()} × {nights} nights
               </span>
-              <span className="font-medium">
-                ${Number(booking.subtotal).toLocaleString()}
-              </span>
+              <span className="font-medium">${Number(booking.subtotal).toLocaleString()}</span>
             </div>
             {Number(booking.cleaningFee) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Cleaning fee</span>
-                <span className="font-medium">
-                  ${Number(booking.cleaningFee).toLocaleString()}
-                </span>
+                <span className="font-medium">${Number(booking.cleaningFee).toLocaleString()}</span>
               </div>
             )}
             {Number(booking.petFee) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Pet fee</span>
-                <span className="font-medium">
-                  ${Number(booking.petFee).toLocaleString()}
-                </span>
+                <span className="font-medium">${Number(booking.petFee).toLocaleString()}</span>
               </div>
             )}
             {Number(booking.platformFee) > 0 && (
@@ -343,9 +327,7 @@ export default function BookingDetailPage({
         {booking.notes && (
           <div className="card p-6">
             <h3 className="font-semibold mb-2">Notes</h3>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {booking.notes}
-            </p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{booking.notes}</p>
           </div>
         )}
 
@@ -385,10 +367,9 @@ export default function BookingDetailPage({
               <h3 className="text-lg font-semibold">Cancel Booking?</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
-              This will cancel the booking for{' '}
-              <strong>{booking.guestName}</strong> from{' '}
-              {checkIn.toLocaleDateString()} to {checkOut.toLocaleDateString()}.
-              The booking status will be set to CANCELLED.
+              This will cancel the booking for <strong>{booking.guestName}</strong> from{' '}
+              {checkIn.toLocaleDateString()} to {checkOut.toLocaleDateString()}. The booking status
+              will be set to CANCELLED.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button

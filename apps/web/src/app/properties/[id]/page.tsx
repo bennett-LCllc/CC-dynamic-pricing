@@ -1,17 +1,28 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import PropertyForm from '@/components/properties/PropertyForm';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { deleteProperty, getProperty } from '@/lib/api';
+import type { Property } from '@cc-ops/shared';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Bath,
+  Bed,
+  Calendar,
+  Edit3,
+  Eye,
+  Flame,
+  Loader2,
+  MapPin,
+  PawPrint,
+  Trash2,
+  Users,
+  Waves,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getProperty, deleteProperty } from '@/lib/api';
-import type { Property } from '@cc-ops/shared';
-import PropertyForm from '@/components/properties/PropertyForm';
-import {
-  ArrowLeft, Edit3, Trash2, MapPin, Bed, Bath, Users, DollarSign,
-  Calendar, TrendingUp, Loader2, AlertTriangle, CheckCircle2,
-  Wifi, Waves, Car, Flame, PawPrint, Eye,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { use, useEffect, useState } from 'react';
 
 type Tab = 'overview' | 'bookings' | 'financials' | 'settings';
 
@@ -75,11 +86,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   }
 
   if (!property) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        Property not found.
-      </div>
-    );
+    return <div className="p-8 text-center text-muted-foreground">Property not found.</div>;
   }
 
   const tabs: { key: Tab; label: string }[] = [
@@ -101,10 +108,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
       <div className="bg-white border-b border-border px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/properties"
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
+            <Link href="/properties" className="p-2 hover:bg-muted rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Link>
             <div>
@@ -192,15 +196,21 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Bedrooms</div>
-                  <div className="font-medium flex items-center gap-1"><Bed className="w-3.5 h-3.5" /> {property.bedrooms}</div>
+                  <div className="font-medium flex items-center gap-1">
+                    <Bed className="w-3.5 h-3.5" /> {property.bedrooms}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Bathrooms</div>
-                  <div className="font-medium flex items-center gap-1"><Bath className="w-3.5 h-3.5" /> {Number(property.bathrooms)}</div>
+                  <div className="font-medium flex items-center gap-1">
+                    <Bath className="w-3.5 h-3.5" /> {Number(property.bathrooms)}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Max Guests</div>
-                  <div className="font-medium flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {property.maxGuests}</div>
+                  <div className="font-medium flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" /> {property.maxGuests}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Square Feet</div>
@@ -216,7 +226,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Created</div>
-                  <div className="font-medium">{new Date(property.createdAt).toLocaleDateString()}</div>
+                  <div className="font-medium">
+                    {new Date(property.createdAt).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
 
@@ -258,7 +270,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   <div className="text-xs text-muted-foreground mb-2">Amenities</div>
                   <div className="flex flex-wrap gap-2">
                     {property.amenities.map((a) => (
-                      <span key={a} className="px-2.5 py-1 bg-muted rounded-full text-xs font-medium">
+                      <span
+                        key={a}
+                        className="px-2.5 py-1 bg-muted rounded-full text-xs font-medium"
+                      >
                         {a}
                       </span>
                     ))}
@@ -269,7 +284,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               {/* Photos */}
               {property.photos && property.photos.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border">
-                  <div className="text-xs text-muted-foreground mb-3">Photos ({property.photos.length})</div>
+                  <div className="text-xs text-muted-foreground mb-3">
+                    Photos ({property.photos.length})
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {property.photos.map((photo) => (
                       <div key={photo.id} className="group relative">
@@ -281,8 +298,13 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
-                              target.parentElement!.classList.add('flex', 'items-center', 'justify-center');
-                              target.parentElement!.innerHTML = '<span class="text-xs text-muted-foreground">No preview</span>';
+                              target.parentElement!.classList.add(
+                                'flex',
+                                'items-center',
+                                'justify-center',
+                              );
+                              target.parentElement!.innerHTML =
+                                '<span class="text-xs text-muted-foreground">No preview</span>';
                             }}
                           />
                         </div>
@@ -345,26 +367,49 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Guest</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Check In</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Check Out</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Nights</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Total</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Platform</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Status</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Guest
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Check In
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Check Out
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Nights
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Total
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Platform
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((booking: any) => (
-                      <tr key={booking.id} className="border-b border-border last:border-0 hover:bg-muted/50">
+                      <tr
+                        key={booking.id}
+                        className="border-b border-border last:border-0 hover:bg-muted/50"
+                      >
                         <td className="px-5 py-3">
                           <div className="font-medium text-sm">{booking.guestName}</div>
                           <div className="text-xs text-muted-foreground">{booking.guestEmail}</div>
                         </td>
-                        <td className="px-5 py-3 text-sm">{new Date(booking.checkIn).toLocaleDateString()}</td>
-                        <td className="px-5 py-3 text-sm">{new Date(booking.checkOut).toLocaleDateString()}</td>
+                        <td className="px-5 py-3 text-sm">
+                          {new Date(booking.checkIn).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-3 text-sm">
+                          {new Date(booking.checkOut).toLocaleDateString()}
+                        </td>
                         <td className="px-5 py-3 text-sm">{booking.totalNights}</td>
-                        <td className="px-5 py-3 text-sm font-medium">${Number(booking.totalAmount).toLocaleString()}</td>
+                        <td className="px-5 py-3 text-sm font-medium">
+                          ${Number(booking.totalAmount).toLocaleString()}
+                        </td>
                         <td className="px-5 py-3">
                           <span className="badge badge-info">{booking.platform}</span>
                         </td>
@@ -394,7 +439,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               </div>
               <div className="stat-card">
                 <div className="stat-label">Net Income</div>
-                <div className={`stat-value ${totalRevenue - totalExpenses >= 0 ? 'text-palm-600' : 'text-red-600'}`}>
+                <div
+                  className={`stat-value ${totalRevenue - totalExpenses >= 0 ? 'text-palm-600' : 'text-red-600'}`}
+                >
                   ${(totalRevenue - totalExpenses).toLocaleString()}
                 </div>
               </div>
@@ -432,21 +479,36 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Date</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Category</th>
-                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Description</th>
-                      <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">Amount</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Date
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Category
+                      </th>
+                      <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Description
+                      </th>
+                      <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wide px-5 py-3">
+                        Amount
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {expenses.slice(0, 10).map((expense: any) => (
-                      <tr key={expense.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                        <td className="px-5 py-3 text-sm">{new Date(expense.date).toLocaleDateString()}</td>
+                      <tr
+                        key={expense.id}
+                        className="border-b border-border last:border-0 hover:bg-muted/50"
+                      >
+                        <td className="px-5 py-3 text-sm">
+                          {new Date(expense.date).toLocaleDateString()}
+                        </td>
                         <td className="px-5 py-3">
                           <span className="badge badge-info">{expense.category}</span>
                         </td>
                         <td className="px-5 py-3 text-sm">{expense.description}</td>
-                        <td className="px-5 py-3 text-sm text-right font-medium">${Number(expense.amount).toLocaleString()}</td>
+                        <td className="px-5 py-3 text-sm text-right font-medium">
+                          ${Number(expense.amount).toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -476,7 +538,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
             <div className="card p-6 border-red-200">
               <h3 className="font-semibold text-red-600 mb-2">Danger Zone</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Set this property to inactive. This will not delete any data but will remove it from active listings.
+                Set this property to inactive. This will not delete any data but will remove it from
+                active listings.
               </p>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -504,8 +567,14 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -513,7 +582,8 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               <h3 className="text-lg font-semibold">Set Property to Inactive?</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
-              This will set <strong>{property.name}</strong> to INACTIVE status. All data will be preserved. You can reactivate it later from the settings tab.
+              This will set <strong>{property.name}</strong> to INACTIVE status. All data will be
+              preserved. You can reactivate it later from the settings tab.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button

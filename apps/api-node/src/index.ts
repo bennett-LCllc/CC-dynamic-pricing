@@ -5,27 +5,25 @@
  * Run with: npm run dev (port 4000)
  */
 
+import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
-import requestLogger, { responseLogger } from './requestLogger';
-import logger from './logger';
+import logger, { requestLogger, responseLogger } from './logger';
 
-import propertyRoutes from './routes/properties';
-import dashboardRoutes from './routes/dashboard';
+import { metricsHandler, metricsMiddleware } from './metrics';
+import { authMiddleware } from './middleware/auth';
+import authRoutes from './routes/auth';
 import bookingRoutes from './routes/bookings';
 import cleaningRoutes from './routes/cleaning';
-import lawnRoutes from './routes/lawn';
-import financialsRoutes from './routes/financials';
-import messageRoutes from './routes/messages';
 import customerRoutes from './routes/customers';
-import authRoutes from './routes/auth';
+import dashboardRoutes from './routes/dashboard';
+import financialsRoutes from './routes/financials';
+import lawnRoutes from './routes/lawn';
+import messageRoutes from './routes/messages';
+import propertyRoutes from './routes/properties';
 import settingsRoutes from './routes/settings';
-import { authMiddleware } from './middleware/auth';
-import { metricsMiddleware, metricsHandler } from './metrics';
-import { sentryRequestHandler, sentryErrorHandler } from './sentry';
+import { sentryErrorHandler, sentryRequestHandler } from './sentry';
 import { setupSwagger } from './swagger';
 
 const app = express();
@@ -36,7 +34,13 @@ app.use(sentryRequestHandler);
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'] }));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : ['http://localhost:3000', 'http://localhost:3001'],
+  }),
+);
 app.use(express.json());
 app.use(requestLogger);
 app.use(responseLogger);

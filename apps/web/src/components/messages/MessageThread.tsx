@@ -1,29 +1,15 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import {
-  ArrowLeft,
-  Send,
-  Loader2,
-  Bot,
-  Mail,
-  MessageSquare,
-  Smartphone,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import {
-  getBookingMessages,
-  sendMessage,
-  deleteMessage,
-  getMessageTemplates,
-} from '@/lib/api';
+import { getBookingMessages, getMessageTemplates, sendMessage } from '@/lib/api';
 import type {
   Booking,
-  GuestMessage,
   CreateMessageInput,
+  GuestMessage,
   MessageTemplate,
   PropertySummary,
 } from '@cc-ops/shared';
+import { ArrowLeft, Bot, Loader2, Mail, MessageSquare, Send, Smartphone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const CHANNEL_ICONS: Record<string, typeof Mail> = {
   AIRBNB: MessageSquare,
@@ -32,25 +18,12 @@ const CHANNEL_ICONS: Record<string, typeof Mail> = {
   EMAIL: Mail,
 };
 
-const TRIGGER_OPTIONS = [
-  { label: 'Custom', value: '' },
-  { label: 'Pre-Arrival', value: 'PRE_ARRIVAL' },
-  { label: 'Check-In Instructions', value: 'CHECK_IN' },
-  { label: 'Mid-Stay Check-In', value: 'MID_STAY' },
-  { label: 'Checkout Reminder', value: 'CHECKOUT' },
-  { label: 'Post-Stay Review', value: 'POST_STAY' },
-  { label: 'Welcome Message', value: 'WELCOME' },
-];
-
 interface MessageThreadProps {
   booking: Booking;
   onBack: () => void;
 }
 
-export default function MessageThread({
-  booking,
-  onBack,
-}: MessageThreadProps) {
+export default function MessageThread({ booking, onBack }: MessageThreadProps) {
   const [messages, setMessages] = useState<GuestMessage[]>([]);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,16 +93,6 @@ export default function MessageThread({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this message?')) return;
-    try {
-      await deleteMessage(id);
-      await fetchMessages();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
-    }
-  };
-
   const applyTemplate = (tpl: MessageTemplate) => {
     if (!tpl) return;
     let text = tpl.content;
@@ -137,7 +100,8 @@ export default function MessageThread({
     text = text.replace(/\{guestName\}/g, booking.guestName || 'Guest');
     text = text.replace(/\{checkIn\}/g, booking.checkIn || '');
     text = text.replace(/\{checkOut\}/g, booking.checkOut || '');
-    const prop = (booking.property || (booking as any).property) as PropertySummary | undefined | null;
+    const prop = (booking.property || (booking as any).property) as
+      PropertySummary | undefined | null;
     if (prop) {
       text = text.replace(/\{propertyName\}/g, prop.name || '');
       text = text.replace(/\{propertyAddress\}/g, prop.address || '');
@@ -159,10 +123,7 @@ export default function MessageThread({
       <div className="bg-white border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
+            <button onClick={onBack} className="p-2 hover:bg-muted rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div>
@@ -228,22 +189,15 @@ export default function MessageThread({
             const isOut = msg.direction === 'OUTBOUND';
             const ChannelIcon = CHANNEL_ICONS[msg.channel] || MessageSquare;
             return (
-              <div
-                key={msg.id}
-                className={`flex ${isOut ? 'justify-end' : 'justify-start'}`}
-              >
+              <div key={msg.id} className={`flex ${isOut ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[75%] rounded-xl px-4 py-3 ${
-                    isOut
-                      ? 'bg-ocean-500 text-white'
-                      : 'bg-muted text-foreground'
+                    isOut ? 'bg-ocean-500 text-white' : 'bg-muted text-foreground'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <ChannelIcon className="w-3.5 h-3.5 opacity-70" />
-                    <span className="text-xs font-medium opacity-70">
-                      {msg.channel}
-                    </span>
+                    <span className="text-xs font-medium opacity-70">{msg.channel}</span>
                     {msg.automated && (
                       <span className="flex items-center gap-0.5 text-xs opacity-70">
                         <Bot className="w-3 h-3" />
@@ -300,11 +254,7 @@ export default function MessageThread({
             disabled={!content.trim() || sending}
             className="inline-flex items-center gap-2 px-4 py-2 bg-ocean-500 text-white rounded-lg text-sm font-medium hover:bg-ocean-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[42px]"
           >
-            {sending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Send
           </button>
         </div>

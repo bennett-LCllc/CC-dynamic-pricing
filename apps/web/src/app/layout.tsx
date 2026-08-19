@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import * as Sentry from '@sentry/nextjs';
-import './globals.css';
 import { Sidebar } from '@/components/shared/Sidebar';
 import { AuthProvider } from '@/lib/auth-context';
+import * as Sentry from '@sentry/nextjs';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -45,25 +45,16 @@ function ErrorBoundary({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {/* Sentry Spotlight for development debugging */}
-        {process.env.NODE_ENV === 'development' && (
-          <Sentry.Spotlight />
-        )}
         <AuthProvider>
           <ErrorBoundary>
             <div className="flex min-h-screen">
               <Sidebar />
-              <main className="flex-1 overflow-auto">
-                {children}
-              </main>
+              <main className="flex-1 overflow-auto">{children}</main>
             </div>
           </ErrorBoundary>
         </AuthProvider>

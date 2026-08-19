@@ -34,3 +34,6 @@ npm-debug.log*
 # Prisma
 prisma/migrations
 agent-context
+
+CC_OPS_TUNEUP_PART_II.md
+CC_OPS_TUNEUP.md

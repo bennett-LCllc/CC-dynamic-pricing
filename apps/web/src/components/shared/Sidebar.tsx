@@ -1,26 +1,31 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import clsx from 'clsx';
 import {
-  Home,
+  BarChart3,
   Building2,
   CalendarDays,
   CalendarRange,
+  DollarSign,
+  Home,
+  MessageSquare,
+  Settings,
   Sparkles,
   TreePine,
-  DollarSign,
-  BarChart3,
-  Settings,
-  MessageSquare,
 } from 'lucide-react';
-import clsx from 'clsx';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   { href: '/' as const, label: 'Dashboard', icon: Home, basePath: '/' },
   { href: '/properties' as const, label: 'Properties', icon: Building2, basePath: '/properties' },
   { href: '/bookings' as const, label: 'Bookings', icon: CalendarDays, basePath: '/bookings' },
-  { href: '/bookings/calendar' as const, label: 'Calendar', icon: CalendarRange, basePath: '/bookings/calendar' },
+  {
+    href: '/bookings/calendar' as const,
+    label: 'Calendar',
+    icon: CalendarRange,
+    basePath: '/bookings/calendar',
+  },
   { href: '/pricing' as const, label: 'Pricing', icon: DollarSign, basePath: '/pricing' },
   { href: '/cleaning' as const, label: 'Cleaning', icon: Sparkles, basePath: '/cleaning' },
   { href: '/lawn' as const, label: 'Lawn Care', icon: TreePine, basePath: '/lawn' },
@@ -51,7 +56,6 @@ export function Sidebar() {
               pathname.startsWith(item.basePath) &&
               // Prevent /bookings from matching /bookings/calendar
               pathname.length <= item.basePath.length + 1);
-          const isActiveExact = pathname === item.href;
           const Icon = item.icon;
 
           return (
@@ -63,7 +67,7 @@ export function Sidebar() {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-ocean-800 text-white'
-                  : 'text-ocean-300 hover:bg-ocean-900 hover:text-white'
+                  : 'text-ocean-300 hover:bg-ocean-900 hover:text-white',
               )}
             >
               <Icon className="w-5 h-5" />

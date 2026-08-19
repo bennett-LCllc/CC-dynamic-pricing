@@ -1,20 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import Link from 'next/link';
 import { Header } from '@/components/shared/Header';
+import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 import { getBookingsCalendar, getProperties } from '@/lib/api';
 import type { Booking, PropertyListItem } from '@cc-ops/shared';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  MapPin,
-  DollarSign,
-  Loader2,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { Calendar, ChevronLeft, ChevronRight, DollarSign, Loader2, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // ─── Date helpers ───────────────────────────────────────────────────────────
 
@@ -71,8 +64,18 @@ function toDate(str: string): Date {
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 // ─── Property color palette ─────────────────────────────────────────────────
@@ -82,7 +85,12 @@ const PROPERTY_COLORS = [
   { bg: 'bg-palm-100', text: 'text-palm-700', border: 'border-palm-300', dot: 'bg-palm-500' },
   { bg: 'bg-sand-100', text: 'text-sand-700', border: 'border-sand-300', dot: 'bg-sand-500' },
   { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', dot: 'bg-rose-500' },
-  { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-300', dot: 'bg-violet-500' },
+  {
+    bg: 'bg-violet-100',
+    text: 'text-violet-700',
+    border: 'border-violet-300',
+    dot: 'bg-violet-500',
+  },
   { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', dot: 'bg-amber-500' },
 ];
 
@@ -168,8 +176,8 @@ function CalendarCell({
           today
             ? 'bg-ocean-500 text-white'
             : day.inMonth
-            ? 'text-foreground'
-            : 'text-muted-foreground/50'
+              ? 'text-foreground'
+              : 'text-muted-foreground/50'
         }`}
       >
         {day.date.getDate()}
@@ -177,13 +185,7 @@ function CalendarCell({
       <div className="space-y-0.5">
         {cellBookings.slice(0, 3).map((b, i) => {
           const color = getPropertyColor(b.propertyId, colorMap);
-          return (
-            <BookingChip
-              key={`${b.id}-${dayStr}-${i}`}
-              booking={b}
-              color={color}
-            />
-          );
+          return <BookingChip key={`${b.id}-${dayStr}-${i}`} booking={b} color={color} />;
         })}
         {cellBookings.length > 3 && (
           <div className="text-xs text-muted-foreground px-1.5">
@@ -280,7 +282,10 @@ export default function BookingsCalendarPage() {
       const result: CalendarDay[] = [];
       const cursor = new Date(gridStart);
       while (cursor <= gridEnd) {
-        result.push({ date: new Date(cursor), inMonth: cursor.getMonth() === currentDate.getMonth() });
+        result.push({
+          date: new Date(cursor),
+          inMonth: cursor.getMonth() === currentDate.getMonth(),
+        });
         cursor.setDate(cursor.getDate() + 1);
       }
       return result;
@@ -375,7 +380,10 @@ export default function BookingsCalendarPage() {
             {/* View mode toggle */}
             <div className="flex items-center border border-border rounded-lg overflow-hidden">
               <button
-                onClick={() => { setViewMode('month'); setCurrentDate(new Date()); }}
+                onClick={() => {
+                  setViewMode('month');
+                  setCurrentDate(new Date());
+                }}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'month'
                     ? 'bg-ocean-500 text-white'
@@ -385,7 +393,10 @@ export default function BookingsCalendarPage() {
                 Month
               </button>
               <button
-                onClick={() => { setViewMode('week'); setCurrentDate(new Date()); }}
+                onClick={() => {
+                  setViewMode('week');
+                  setCurrentDate(new Date());
+                }}
                 className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                   viewMode === 'week'
                     ? 'bg-ocean-500 text-white'
@@ -429,13 +440,19 @@ export default function BookingsCalendarPage() {
             {/* Day name headers */}
             <div className="grid grid-cols-7 border-t border-l border-border bg-muted/50">
               {days.slice(0, 7).map((d, i) => (
-                <CalendarCell key={`header-${i}`} day={d} bookings={[]} colorMap={colorMap} isHeader />
+                <CalendarCell
+                  key={`header-${i}`}
+                  day={d}
+                  bookings={[]}
+                  colorMap={colorMap}
+                  isHeader
+                />
               ))}
             </div>
 
             {/* Day cells */}
             <div className="grid grid-cols-7 border-l border-border">
-              {days.map((day, i) => (
+              {days.map((day) => (
                 <CalendarCell
                   key={formatISODate(day.date)}
                   day={day}

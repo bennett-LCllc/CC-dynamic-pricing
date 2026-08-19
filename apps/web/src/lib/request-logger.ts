@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server';
 import { randomUUID } from 'crypto';
+import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from './logger';
 
 /**
@@ -20,7 +20,7 @@ export function requestLoggingMiddleware(request: NextRequest) {
     searchParams: Object.fromEntries(request.nextUrl.searchParams),
     ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
     userAgent: request.headers.get('user-agent') || 'unknown',
-  });
+  }) as unknown as import('pino').Logger;
 
   // Log incoming request
   log.info('Incoming request');
@@ -42,7 +42,7 @@ export function requestLoggingMiddleware(request: NextRequest) {
  * Wrapper for API route handlers to add logging
  */
 export function withRequestLogging(
-  handler: (request: NextRequest, context: { params: Promise<any> }) => Promise<NextResponse>
+  handler: (request: NextRequest, context: { params: Promise<any> }) => Promise<NextResponse>,
 ) {
   return async (request: NextRequest, context: { params: Promise<any> }) => {
     const requestId = request.headers.get('x-request-id') || randomUUID();
@@ -53,7 +53,7 @@ export function withRequestLogging(
       correlationId,
       method: request.method,
       path: request.nextUrl.pathname,
-    });
+    }) as unknown as import('pino').Logger;
 
     (request as any).log = log;
     (request as any).requestId = requestId;
@@ -66,10 +66,13 @@ export function withRequestLogging(
       const response = await handler(request, context);
       const duration = Date.now() - start;
 
-      log.info({
-        statusCode: response.status,
-        durationMs: duration,
-      }, 'API request completed');
+      log.info(
+        {
+          statusCode: response.status,
+          durationMs: duration,
+        },
+        'API request completed',
+      );
 
       response.headers.set('x-request-id', requestId);
       response.headers.set('x-correlation-id', correlationId);
@@ -77,16 +80,16 @@ export function withRequestLogging(
       return response;
     } catch (error) {
       const duration = Date.now() - start;
-      log.error({
-        err: error,
-        durationMs: duration,
-        message: error instanceof Error ? error.message : 'Unknown error',
-      }, 'API request failed');
-
-      const errorResponse = NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
+      log.error(
+        {
+          err: error,
+          durationMs: duration,
+          message: error instanceof Error ? error.message : 'Unknown error',
+        },
+        'API request failed',
       );
+
+      const errorResponse = NextResponse.json({ error: 'Internal server error' }, { status: 500 });
       errorResponse.headers.set('x-request-id', requestId);
       errorResponse.headers.set('x-correlation-id', correlationId);
 

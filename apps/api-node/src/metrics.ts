@@ -1,5 +1,5 @@
-import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { collectDefaultMetrics, Counter, Histogram, Registry } from 'prom-client';
 
 // Create a new registry (default is singleton)
 export const register = new Registry();
@@ -71,7 +71,7 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
 };
 
 // Expose Prometheus metrics endpoint
-export const metricsHandler = (_req: Request, res: Response) => {
+export const metricsHandler = async (_req: Request, res: Response) => {
   res.setHeader('Content-Type', register.contentType);
-  register.metrics().pipe(res);
+  res.end(await register.metrics());
 };

@@ -2,19 +2,19 @@
  * Auth routes — login, register, session, user management.
  */
 
-import { Router, Request, Response } from 'express';
+import { prisma } from '@cc-ops/db';
+import { Request, Response, Router } from 'express';
 import { z } from 'zod';
+import { authMiddleware } from '../middleware/auth';
 import {
   authenticateUser,
   createUser,
-  getUserById,
-  updateUser,
   deleteUser,
-  listUsers,
   generateToken,
+  getUserById,
+  listUsers,
+  updateUser,
 } from '../services/auth';
-import { prisma } from '@cc-ops/db';
-import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
 
@@ -61,7 +61,12 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
-    const token = generateToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+    });
     res.json({ data: { token, user } });
   } catch (err) {
     console.error('POST /api/auth/login error:', err);
@@ -81,10 +86,15 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 
   try {
-    const existing = await getUserById(parsed.data.email).catch(() => null);
+    await getUserById(parsed.data.email).catch(() => null);
     // Check by email uniqueness via create catch
     const user = await createUser(parsed.data);
-    const token = generateToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: 0 });
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: 0,
+    });
     res.status(201).json({ data: { token, user } });
   } catch (err) {
     const message = err instanceof Error ? err.message : '';

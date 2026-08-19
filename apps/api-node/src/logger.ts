@@ -1,6 +1,16 @@
-import pino from 'pino';
 import { randomUUID } from 'crypto';
-import type { Request } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import pino, { Logger } from 'pino';
+
+declare global {
+  namespace Express {
+    interface Request {
+      id?: string;
+      correlationId?: string;
+      log?: Logger;
+    }
+  }
+}
 
 const serviceName = 'cc-ops-api';
 const serviceVersion = process.env.npm_package_version || '0.0.0';
@@ -33,15 +43,18 @@ export const logger = pino({
     ],
     censor: '[REDACTED]',
   },
-  transport: process.env.NODE_ENV !== 'production' ? {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'HH:MM:ss Z',
-      singleLine: true,
-      ignore: 'pid,hostname',
-    },
-  } : undefined,
+  transport:
+    process.env.NODE_ENV !== 'production'
+      ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'HH:MM:ss Z',
+            singleLine: true,
+            ignore: 'pid,hostname',
+          },
+        }
+      : undefined,
 });
 
 /**
@@ -54,7 +67,7 @@ export function createModuleLogger(moduleName: string, extraMeta?: Record<string
 /**
  * Request logger middleware - adds correlation IDs and child logger to request
  */
-export const requestLogger = (req: Request, _res, next) => {
+export const requestLogger = (req: Request, _res: Response, next: NextFunction) => {
   const requestId = randomUUID();
   // Use existing correlation ID from headers (for distributed tracing) or generate new
   const correlationId = (req.headers['x-correlation-id'] as string) || requestId;
@@ -64,14 +77,17 @@ export const requestLogger = (req: Request, _res, next) => {
   req.log = logger.child({ requestId, correlationId });
 
   // Log incoming request
-  req.log.info({
-    method: req.method,
-    url: req.url,
-    path: req.path,
-    query: req.query,
-    ip: req.ip,
-    userAgent: req.get('user-agent'),
-  }, 'Incoming request');
+  req.log.info(
+    {
+      method: req.method,
+      url: req.url,
+      path: req.path,
+      query: req.query,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    },
+    'Incoming request',
+  );
 
   next();
 };
@@ -79,20 +95,23 @@ export const requestLogger = (req: Request, _res, next) => {
 /**
  * Response logger middleware - logs response details
  */
-export const responseLogger = (req: Request, res, next) => {
+export const responseLogger = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
 
   res.on('finish', () => {
     const duration = Date.now() - start;
     const log = req.log || logger;
 
-    log.info({
-      method: req.method,
-      path: req.path,
-      statusCode: res.statusCode,
-      durationMs: duration,
-      contentLength: res.get('content-length'),
-    }, 'Request completed');
+    log.info(
+      {
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        durationMs: duration,
+        contentLength: res.get('content-length'),
+      },
+      'Request completed',
+    );
   });
 
   next();

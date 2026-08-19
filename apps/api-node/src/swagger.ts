@@ -1,7 +1,7 @@
-import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
 import yaml from 'js-yaml';
 import path from 'path';
-import fs from 'fs';
+import swaggerUi from 'swagger-ui-express';
 
 const specPath = path.resolve(__dirname, '../openapi.yaml');
 
@@ -10,7 +10,7 @@ let openapiSpec: Record<string, any>;
 try {
   const yamlContent = fs.readFileSync(specPath, 'utf8');
   const parsedYaml = yaml.load(yamlContent);
-  openapiSpec = parsedYaml;
+  openapiSpec = parsedYaml as Record<string, any>;
 } catch (e) {
   console.error('Failed to load OpenAPI spec:', e);
   process.exit(1);

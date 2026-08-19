@@ -1,39 +1,35 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { Header } from '@/components/shared/Header';
 import MessageThread from '@/components/messages/MessageThread';
+import { Header } from '@/components/shared/Header';
+import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 import {
-  getBookings,
-  getProperties,
-  getMessageTemplates,
   createMessageTemplate,
-  updateMessageTemplate,
   deleteMessageTemplate,
+  getBookings,
+  getMessageTemplates,
+  getProperties,
+  updateMessageTemplate,
 } from '@/lib/api';
 import type {
   Booking,
-  PropertyListItem,
-  MessageTemplate,
   CreateMessageTemplateInput,
-  UpdateMessageTemplateInput,
-  GuestMessage,
-  MessageFilters as MessageFiltersInput,
+  MessageTemplate,
+  PropertyListItem,
 } from '@cc-ops/shared';
 import {
-  Plus,
-  Edit3,
-  Trash2,
-  MessageSquare,
-  Search,
-  Loader2,
   BookOpen,
-  X,
   ChevronRight,
+  Edit3,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Search,
+  Trash2,
+  X,
 } from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { PlatformBadge } from '@/components/shared/PlatformBadge';
+import { useCallback, useEffect, useState } from 'react';
 
 type ActiveTab = 'inbox' | 'templates';
 
@@ -79,12 +75,16 @@ function TemplateForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h3 className="text-lg font-semibold">
-            {template ? 'Edit Template' : 'New Template'}
-          </h3>
+          <h3 className="text-lg font-semibold">{template ? 'Edit Template' : 'New Template'}</h3>
           <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -165,7 +165,11 @@ function TemplateForm({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               Cancel
             </button>
             <button
@@ -188,7 +192,6 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('inbox');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [properties, setProperties] = useState<PropertyListItem[]>([]);
-  const [messages, setMessages] = useState<GuestMessage[]>([]);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -196,8 +199,6 @@ export default function MessagesPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<MessageTemplate | undefined>();
-  const [directionFilter, setDirectionFilter] = useState('');
-  const [channelFilter, setChannelFilter] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -245,9 +246,6 @@ export default function MessagesPage() {
   // Build property map
   const propertyMap = new Map(properties.map((p) => [p.id, p.name]));
 
-  // Build booking map
-  const bookingMap = new Map(bookings.map((b) => [b.id, b]));
-
   // Filter bookings for inbox
   const filteredBookings = bookings.filter((b) => {
     if (searchQuery) {
@@ -274,7 +272,10 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center border border-border rounded-lg overflow-hidden">
             <button
-              onClick={() => { setActiveTab('inbox'); setSelectedBooking(null); }}
+              onClick={() => {
+                setActiveTab('inbox');
+                setSelectedBooking(null);
+              }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'inbox'
                   ? 'bg-ocean-500 text-white'
@@ -284,7 +285,10 @@ export default function MessagesPage() {
               Inbox
             </button>
             <button
-              onClick={() => { setActiveTab('templates'); setSelectedBooking(null); }}
+              onClick={() => {
+                setActiveTab('templates');
+                setSelectedBooking(null);
+              }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'templates'
                   ? 'bg-ocean-500 text-white'
@@ -297,7 +301,10 @@ export default function MessagesPage() {
 
           {activeTab === 'templates' && (
             <button
-              onClick={() => { setEditingTemplate(undefined); setShowTemplateForm(true); }}
+              onClick={() => {
+                setEditingTemplate(undefined);
+                setShowTemplateForm(true);
+              }}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-ocean-500 text-white rounded-lg font-medium hover:bg-ocean-600 transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -312,10 +319,7 @@ export default function MessagesPage() {
             {/* Thread view */}
             {selectedBooking ? (
               <div className="card overflow-hidden" style={{ height: 'calc(100vh - 260px)' }}>
-                <MessageThread
-                  booking={selectedBooking}
-                  onBack={() => setSelectedBooking(null)}
-                />
+                <MessageThread booking={selectedBooking} onBack={() => setSelectedBooking(null)} />
               </div>
             ) : (
               <>
@@ -396,10 +400,14 @@ export default function MessagesPage() {
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Templates Yet</h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-                  Create message templates for automated guest communication. Use variables like {'{guestName}'} and {'{checkIn}'} for personalization.
+                  Create message templates for automated guest communication. Use variables like{' '}
+                  {'{guestName}'} and {'{checkIn}'} for personalization.
                 </p>
                 <button
-                  onClick={() => { setEditingTemplate(undefined); setShowTemplateForm(true); }}
+                  onClick={() => {
+                    setEditingTemplate(undefined);
+                    setShowTemplateForm(true);
+                  }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 bg-ocean-500 text-white rounded-lg font-medium hover:bg-ocean-600 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
@@ -421,7 +429,9 @@ export default function MessagesPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-muted-foreground">{tpl.trigger || 'Custom'}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {tpl.trigger || 'Custom'}
+                          </span>
                           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
                             {tpl.channel}
                           </span>
@@ -433,12 +443,21 @@ export default function MessagesPage() {
                           className="p-1.5 hover:bg-muted rounded-lg transition-colors"
                           title={tpl.isActive ? 'Deactivate' : 'Activate'}
                         >
-                          <span className={tpl.isActive ? 'text-palm-600 text-xs font-medium' : 'text-muted-foreground text-xs font-medium'}>
+                          <span
+                            className={
+                              tpl.isActive
+                                ? 'text-palm-600 text-xs font-medium'
+                                : 'text-muted-foreground text-xs font-medium'
+                            }
+                          >
                             {tpl.isActive ? 'ON' : 'OFF'}
                           </span>
                         </button>
                         <button
-                          onClick={() => { setEditingTemplate(tpl); setShowTemplateForm(true); }}
+                          onClick={() => {
+                            setEditingTemplate(tpl);
+                            setShowTemplateForm(true);
+                          }}
                           className="p-1.5 hover:bg-muted rounded-lg transition-colors"
                         >
                           <Edit3 className="w-4 h-4 text-muted-foreground" />
@@ -465,7 +484,10 @@ export default function MessagesPage() {
                     {tpl.variables.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {tpl.variables.map((v) => (
-                          <span key={v} className="text-xs bg-ocean-50 text-ocean-600 px-1.5 py-0.5 rounded">
+                          <span
+                            key={v}
+                            className="text-xs bg-ocean-50 text-ocean-600 px-1.5 py-0.5 rounded"
+                          >
                             {v}
                           </span>
                         ))}

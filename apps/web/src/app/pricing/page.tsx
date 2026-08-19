@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { Header } from '@/components/shared/Header';
 import { calculateRate, getForecast } from '@/lib/api';
-import { DollarSign, TrendingUp, CalendarDays, Info } from 'lucide-react';
+import { DollarSign, Info, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
 
 interface RateResult {
   base_rate: number;
@@ -193,9 +193,7 @@ export default function PricingPage() {
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Date
-                </label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
                 <input
                   type="date"
                   value={singleDate}
@@ -215,9 +213,7 @@ export default function PricingPage() {
                 <div className="mt-4 p-4 bg-ocean-50 rounded-lg">
                   <div className="text-center mb-4">
                     <p className="text-sm text-muted-foreground">Recommended Rate</p>
-                    <p className="text-4xl font-bold text-ocean-600">
-                      ${singleRate.final_rate}
-                    </p>
+                    <p className="text-4xl font-bold text-ocean-600">${singleRate.final_rate}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Floor: ${singleRate.floor} • Ceiling: ${singleRate.ceiling}
                     </p>
@@ -276,15 +272,21 @@ export default function PricingPage() {
                   </div>
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-xs text-muted-foreground">Projected Revenue</p>
-                    <p className="text-lg font-bold">${forecastSummary.projected_revenue.toLocaleString()}</p>
+                    <p className="text-lg font-bold">
+                      ${forecastSummary.projected_revenue.toLocaleString()}
+                    </p>
                   </div>
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-xs text-muted-foreground">Min / Max</p>
-                    <p className="text-lg font-bold">${forecastSummary.min_rate} / ${forecastSummary.max_rate}</p>
+                    <p className="text-lg font-bold">
+                      ${forecastSummary.min_rate} / ${forecastSummary.max_rate}
+                    </p>
                   </div>
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-xs text-muted-foreground">Available / Booked</p>
-                    <p className="text-lg font-bold">{forecastSummary.available_days} / {forecastSummary.booked_days}</p>
+                    <p className="text-lg font-bold">
+                      {forecastSummary.available_days} / {forecastSummary.booked_days}
+                    </p>
                   </div>
                 </div>
 
@@ -294,7 +296,9 @@ export default function PricingPage() {
                       <tr className="border-b border-border">
                         <th className="text-left py-2 font-medium text-muted-foreground">Date</th>
                         <th className="text-right py-2 font-medium text-muted-foreground">Rate</th>
-                        <th className="text-right py-2 font-medium text-muted-foreground">Status</th>
+                        <th className="text-right py-2 font-medium text-muted-foreground">
+                          Status
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -328,11 +332,26 @@ export default function PricingPage() {
             <div>
               <h4 className="font-medium text-sm">How the Pricing Engine Works</h4>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• <strong>Seasonal:</strong> Corpus Christi peak season (Jun–Aug) commands 25–30% premium. Winter months (Jan–Feb) are discounted 20–25%.</li>
-                <li>• <strong>Day of Week:</strong> Friday/Saturday nights command 20–25% premium. Monday/Tuesday are discounted 15–20%.</li>
-                <li>• <strong>Events:</strong> Spring Break (March), Memorial Day, July 4th, and Buccaneer Days trigger event multipliers up to 40%.</li>
-                <li>• <strong>Occupancy:</strong> When your next 14 days are 90%+ booked, rates surge 30%. Below 30%, rates drop 20% to fill gaps.</li>
-                <li>• <strong>Floors/Ceilings:</strong> Based on property type and bedroom count. Beachfront 1BR floors at $150/night.</li>
+                <li>
+                  • <strong>Seasonal:</strong> Corpus Christi peak season (Jun–Aug) commands 25–30%
+                  premium. Winter months (Jan–Feb) are discounted 20–25%.
+                </li>
+                <li>
+                  • <strong>Day of Week:</strong> Friday/Saturday nights command 20–25% premium.
+                  Monday/Tuesday are discounted 15–20%.
+                </li>
+                <li>
+                  • <strong>Events:</strong> Spring Break (March), Memorial Day, July 4th, and
+                  Buccaneer Days trigger event multipliers up to 40%.
+                </li>
+                <li>
+                  • <strong>Occupancy:</strong> When your next 14 days are 90%+ booked, rates surge
+                  30%. Below 30%, rates drop 20% to fill gaps.
+                </li>
+                <li>
+                  • <strong>Floors/Ceilings:</strong> Based on property type and bedroom count.
+                  Beachfront 1BR floors at $150/night.
+                </li>
               </ul>
             </div>
           </div>

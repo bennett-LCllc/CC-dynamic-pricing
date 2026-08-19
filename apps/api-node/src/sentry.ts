@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { Integrations } from '@sentry/tracing';
-import type { Request, Response, NextFunction } from 'express';
+import type { ErrorRequestHandler } from 'express';
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -10,13 +9,11 @@ if (process.env.SENTRY_DSN) {
     enabled: true,
     attachStacktrace: true,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
-    includeLocations: true,
     profilesSampleRate: process.env.NODE_ENV === 'production' ? 1.0 : 0.1,
 
     integrations: [
-      new Integrations.Node(), // captures unhandled exceptions
-      new Integrations.Http({ tracing: true }), // captures HTTP request traces
-      new Integrations.Express({ app: undefined as any }), // Express middleware (set app later)
+      new Sentry.Integrations.Http({ tracing: true }), // captures HTTP request traces
+      new Sentry.Integrations.Express({ app: undefined as any }), // Express middleware (set app later)
     ],
   });
 }
@@ -31,7 +28,7 @@ export const sentryRequestHandler = Sentry.Handlers.requestHandler();
  * Express error handler middleware - must be the last middleware
  * to capture all errors
  */
-export const sentryErrorHandler = Sentry.Handlers.errorHandler({
+export const sentryErrorHandler: ErrorRequestHandler = Sentry.Handlers.errorHandler({
   shouldHandleError: (error) => {
     // Don't handle 404s or validation errors as "errors" in Sentry
     if (error instanceof SyntaxError && 'status' in error && error.status === 400) {
@@ -53,16 +50,25 @@ export function captureException(error: Error, context?: Record<string, any>) {
 /**
  * Capture a message with level
  */
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
+export function captureMessage(
+  message: string,
+  level: Sentry.SeverityLevel = 'info',
+  context?: Record<string, any>,
+) {
   if (process.env.SENTRY_DSN) {
-    Sentry.captureMessage(message, level, { extra: context });
+    Sentry.withScope((scope) => {
+      if (context) scope.setExtras(context);
+      Sentry.captureMessage(message, level);
+    });
   }
 }
 
 /**
  * Set user context for Sentry
  */
-export function setUserContext(user: { id: string; email?: string; username?: string; [key: string]: any } | null) {
+export function setUserContext(
+  user: { id: string; email?: string; username?: string; [key: string]: any } | null,
+) {
   if (process.env.SENTRY_DSN) {
     Sentry.setUser(user);
   }

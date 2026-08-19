@@ -1,38 +1,31 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
-import {
-  getFinancialOverview,
-  getExpenses,
-  createExpense,
-  updateExpense,
-  deleteExpense,
-} from '@/lib/api';
-import type {
-  FinancialOverview,
-  Expense,
-  ExpenseBreakdown,
-  ExpenseCategory,
-  LLC,
-} from '@cc-ops/shared';
 import ExpenseForm from '@/components/financials/ExpenseForm';
 import {
-  BarChart3,
-  Plus,
-  Search,
-  Loader2,
+  createExpense,
+  deleteExpense,
+  getExpenses,
+  getFinancialOverview,
+  updateExpense,
+} from '@/lib/api';
+import type { Expense, ExpenseBreakdown, FinancialOverview, LLC } from '@cc-ops/shared';
+import {
   AlertTriangle,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Receipt,
-  Edit2,
-  Trash2,
+  BarChart3,
   ChevronDown,
   ChevronUp,
+  DollarSign,
+  Edit2,
+  Loader2,
+  Plus,
+  Receipt,
+  Search,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useEffect, useMemo, useState } from 'react';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 const LLC_COLORS: Record<string, string> = {
   STR: '#0ea5e9',
@@ -41,8 +34,16 @@ const LLC_COLORS: Record<string, string> = {
 };
 
 const PIE_COLORS = [
-  '#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#a3e635',
+  '#0ea5e9',
+  '#22c55e',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#ec4899',
+  '#14b8a6',
+  '#f97316',
+  '#6366f1',
+  '#a3e635',
 ];
 
 const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
@@ -87,7 +88,9 @@ export default function FinancialsPage() {
   const [filterLLC, setFilterLLC] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [sortField, setSortField] = useState<'date' | 'amount' | 'description' | 'category'>('date');
+  const [sortField, setSortField] = useState<'date' | 'amount' | 'description' | 'category'>(
+    'date',
+  );
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [expandedSections, setExpandedSections] = useState({
     str: false,
@@ -126,7 +129,7 @@ export default function FinancialsPage() {
         (e) =>
           e.description.toLowerCase().includes(q) ||
           e.category.toLowerCase().includes(q) ||
-          (e.vendor ?? '').toLowerCase().includes(q)
+          (e.vendor ?? '').toLowerCase().includes(q),
       );
     }
 
@@ -193,10 +196,7 @@ export default function FinancialsPage() {
     );
   };
 
-  const totalExpensesFiltered = filteredExpenses.reduce(
-    (sum, e) => sum + Number(e.amount),
-    0
-  );
+  const totalExpensesFiltered = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   if (loading) {
     return (
@@ -248,19 +248,30 @@ export default function FinancialsPage() {
                 <div>
                   <div className="text-sm text-muted-foreground">Total Revenue</div>
                   <div className="text-2xl font-bold text-ocean-600">
-                    ${overview.consolidated.revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    $
+                    {overview.consolidated.revenue.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Total Expenses</div>
                   <div className="text-2xl font-bold text-red-600">
-                    ${overview.consolidated.expenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    $
+                    {overview.consolidated.expenses.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Net Income</div>
-                  <div className={`text-2xl font-bold ${overview.consolidated.netIncome >= 0 ? 'text-palm-600' : 'text-red-600'}`}>
-                    ${overview.consolidated.netIncome.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  <div
+                    className={`text-2xl font-bold ${overview.consolidated.netIncome >= 0 ? 'text-palm-600' : 'text-red-600'}`}
+                  >
+                    $
+                    {overview.consolidated.netIncome.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
                   </div>
                 </div>
               </div>
@@ -274,10 +285,7 @@ export default function FinancialsPage() {
                 const isExpanded = expandedSections[llcLower];
 
                 return (
-                  <div
-                    key={llc}
-                    className="card p-5 hover:border-ocean-200 transition-colors"
-                  >
+                  <div key={llc} className="card p-5 hover:border-ocean-200 transition-colors">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="font-semibold" style={{ color: LLC_COLORS[llc] }}>
                         {llc}
@@ -412,9 +420,7 @@ export default function FinancialsPage() {
                           <div className="text-sm font-semibold">
                             ${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {item.percentage}%
-                          </div>
+                          <div className="text-xs text-muted-foreground">{item.percentage}%</div>
                         </div>
                       </div>
                     ))}
@@ -467,7 +473,9 @@ export default function FinancialsPage() {
               >
                 <option value="">All LLCs</option>
                 {LLC_OPTIONS.map((llc) => (
-                  <option key={llc} value={llc}>{llc}</option>
+                  <option key={llc} value={llc}>
+                    {llc}
+                  </option>
                 ))}
               </select>
             </div>
@@ -573,11 +581,10 @@ export default function FinancialsPage() {
                           {expense.incurredBy}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-muted-foreground">
-                        {expense.vendor ?? '—'}
-                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">{expense.vendor ?? '—'}</td>
                       <td className="px-5 py-3 text-right font-semibold whitespace-nowrap">
-                        ${Number(expense.amount).toLocaleString(undefined, {
+                        $
+                        {Number(expense.amount).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                         })}
                       </td>
@@ -609,7 +616,8 @@ export default function FinancialsPage() {
                       {filteredExpenses.length !== 1 ? 's' : ''}):
                     </td>
                     <td className="px-5 py-3 text-right text-sm whitespace-nowrap">
-                      ${totalExpensesFiltered.toLocaleString(undefined, {
+                      $
+                      {totalExpensesFiltered.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                       })}
                     </td>

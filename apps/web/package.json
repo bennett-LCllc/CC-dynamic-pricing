@@ -17,7 +17,7 @@
   "dependencies": {
     "@cc-ops/db": "*",
     "@cc-ops/shared": "*",
-    "@sentry/nextjs": "^8.0.0",
+    "@sentry/nextjs": "^7.0.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "lucide-react": "^0.379.0",

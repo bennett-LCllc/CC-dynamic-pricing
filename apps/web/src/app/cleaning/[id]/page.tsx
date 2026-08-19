@@ -1,21 +1,26 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import CleaningJobForm from '@/components/cleaning/CleaningJobForm';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { deleteCleaningJob, getCleaningJob, submitCleaningChecklist } from '@/lib/api';
+import type { CleaningChecklist, CleaningJob } from '@cc-ops/shared';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Camera,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock,
+  Edit3,
+  Loader2,
+  MapPin,
+  Sparkles,
+  Trash2,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  getCleaningJob,
-  deleteCleaningJob,
-  submitCleaningChecklist,
-} from '@/lib/api';
-import type { CleaningJob, CleaningChecklist } from '@cc-ops/shared';
-import CleaningJobForm from '@/components/cleaning/CleaningJobForm';
-import {
-  ArrowLeft, Edit3, Trash2, MapPin, User, Clock,
-  DollarSign, Loader2, AlertTriangle, CheckCircle2,
-  Sparkles, Camera, ClipboardCheck,
-} from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { use, useEffect, useState } from 'react';
 
 const CLEANING_TYPE_LABELS: Record<string, string> = {
   TURNOVER: 'Turnover',
@@ -73,11 +78,7 @@ const CHECKLIST_TEMPLATES: Record<string, string[]> = {
   ],
 };
 
-export default function CleaningJobDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function CleaningJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
 
@@ -143,7 +144,7 @@ export default function CleaningJobDetailPage({
 
   // Determine which checklist template to use
   const templateTasks = job
-    ? CHECKLIST_TEMPLATES[job.cleaningType] ?? CHECKLIST_TEMPLATES.TURNOVER
+    ? (CHECKLIST_TEMPLATES[job.cleaningType] ?? CHECKLIST_TEMPLATES.TURNOVER)
     : [];
 
   // Merge template with any saved tasks
@@ -173,11 +174,7 @@ export default function CleaningJobDetailPage({
   }
 
   if (!job) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        Cleaning job not found.
-      </div>
-    );
+    return <div className="p-8 text-center text-muted-foreground">Cleaning job not found.</div>;
   }
 
   const scheduledStart = new Date(job.scheduledStart);
@@ -195,17 +192,12 @@ export default function CleaningJobDetailPage({
       <div className="bg-white border-b border-border px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/cleaning"
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-            >
+            <Link href="/cleaning" className="p-2 hover:bg-muted rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Link>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold">
-                  {job.property?.name ?? 'Unknown Property'}
-                </h1>
+                <h1 className="text-2xl font-bold">{job.property?.name ?? 'Unknown Property'}</h1>
                 <StatusBadge status={job.status} variant="booking" />
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
@@ -349,10 +341,14 @@ export default function CleaningJobDetailPage({
                   <div className="text-xs text-muted-foreground mb-2">Property Details</div>
                   <div className="flex gap-4 text-sm">
                     {job.bedrooms != null && (
-                      <span>{job.bedrooms} bed{job.bedrooms !== 1 ? 's' : ''}</span>
+                      <span>
+                        {job.bedrooms} bed{job.bedrooms !== 1 ? 's' : ''}
+                      </span>
                     )}
                     {job.bathrooms != null && (
-                      <span>{job.bathrooms} bath{job.bathrooms !== 1 ? 's' : ''}</span>
+                      <span>
+                        {job.bathrooms} bath{job.bathrooms !== 1 ? 's' : ''}
+                      </span>
                     )}
                     {job.squareFeet != null && (
                       <span>{Number(job.squareFeet).toLocaleString()} sqft</span>
@@ -368,9 +364,8 @@ export default function CleaningJobDetailPage({
                     href={`/bookings/${job.booking.id}`}
                     className="text-sm text-ocean-600 hover:text-ocean-700 font-medium"
                   >
-                    {job.booking.guestName} —{' '}
-                    {new Date(job.booking.checkIn).toLocaleDateString()} to{' '}
-                    {new Date(job.booking.checkOut).toLocaleDateString()}
+                    {job.booking.guestName} — {new Date(job.booking.checkIn).toLocaleDateString()}{' '}
+                    to {new Date(job.booking.checkOut).toLocaleDateString()}
                   </Link>
                 </div>
               )}
@@ -451,9 +446,7 @@ export default function CleaningJobDetailPage({
                   className="w-4 h-4 rounded border-border text-ocean-600 focus:ring-ocean-500"
                 />
                 <span
-                  className={`text-sm ${
-                    task.done ? 'line-through text-muted-foreground' : ''
-                  }`}
+                  className={`text-sm ${task.done ? 'line-through text-muted-foreground' : ''}`}
                 >
                   {task.name}
                 </span>
@@ -510,9 +503,7 @@ export default function CleaningJobDetailPage({
         {job.notes && (
           <div className="card p-6">
             <h3 className="font-semibold mb-2">Notes</h3>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {job.notes}
-            </p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.notes}</p>
           </div>
         )}
 
@@ -552,10 +543,8 @@ export default function CleaningJobDetailPage({
               <h3 className="text-lg font-semibold">Cancel Cleaning Job?</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
-              This will cancel the cleaning job for{' '}
-              <strong>{job.property?.name}</strong> scheduled on{' '}
-              {scheduledStart.toLocaleDateString()}. The job status will be set to
-              CANCELLED.
+              This will cancel the cleaning job for <strong>{job.property?.name}</strong> scheduled
+              on {scheduledStart.toLocaleDateString()}. The job status will be set to CANCELLED.
             </p>
             <div className="flex items-center justify-end gap-3">
               <button

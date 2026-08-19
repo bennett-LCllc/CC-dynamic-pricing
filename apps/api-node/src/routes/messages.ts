@@ -2,22 +2,21 @@
  * Messages routes — Express router for /api/messages
  */
 
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
-  getMessageTemplates,
-  getMessageTemplate,
   createMessageTemplate,
-  updateMessageTemplate,
+  deleteMessage,
   deleteMessageTemplate,
-  getMessages,
   getBookingMessages,
   getMessage,
-  sendMessage,
-  updateMessage,
+  getMessages,
+  getMessageTemplates,
   markMessageDelivered,
   markMessageRead,
-  deleteMessage,
+  sendMessage,
+  updateMessage,
+  updateMessageTemplate,
 } from '../services/messages';
 
 const router = Router();
