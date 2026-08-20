@@ -39,3 +39,12 @@ CC_OPS_TUNEUP_PART_II.md
 CC_OPS_TUNEUP.md
 .worktrees/
 c-suite
+
+# Agent context / conversation history (includes subdirectories)
+agent-context/*
+
+# Railway deployment
+.railway/
+
+# OpenAPI generated file (keep openapi-from-zod.yaml as source of truth)
+apps/api-node/openapi.yaml
