@@ -3,21 +3,21 @@ FROM node:20-slim AS base
 # Install libc6-dev for native dependencies like bcrypt
 RUN apt-get update && apt-get install -y --no-install-recommends libc6-dev && rm -rf /var/lib/apt/lists/*
 
-# ==== 1️⃣ Copy repository‑root package manifests (they live at the repo root) ====
-# From apps/api-node context, the repo root is one directory up.
-COPY ../package.json .
-COPY ../package-lock.json* ./
+WORKDIR /app
+
+# ==== 1️⃣ Copy repository‑root package manifests ====
+COPY package.json .
+COPY package-lock.json* ./
 
 # ==== 2️⃣ Copy workspace package manifests ====
 # web workspace
-COPY ../apps/web/package.json apps/web/package.json
-COPY ../apps/web/package-lock.json apps/web/package-lock.json
+COPY apps/web/package.json apps/web/package.json
+# api-node workspace
+COPY apps/api-node/package.json apps/api-node/package.json
 # db workspace
-COPY ../packages/db/package.json packages/db/package.json
-COPY ../packages/db/package-lock.json packages/db/package-lock.json
+COPY packages/db/package.json packages/db/package.json
 # shared workspace
-COPY ../packages/shared/package.json packages/shared/package.json
-COPY ../packages/shared/package-lock.json packages/shared/package-lock.json
+COPY packages/shared/package.json packages/shared/package.json
 
 # ==== 3️⃣ Install all workspace dependencies ====
 RUN npm install --workspaces --legacy-peer-deps
@@ -42,29 +42,43 @@ RUN npm run build --workspace=@cc-ops/db
 RUN npm run build --workspace=@cc-ops/api-node
 
 # =========================================================
-# Production stage
+# Production stage - FRESH stage (NOT from base) to avoid root package.json "type": "module"
 # =========================================================
-FROM base AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Install OpenSSL 1.1 for Prisma binary target debian-openssl-1.1.x
+# Add bullseye repo for libssl1.1 (not available in bookworm)
+RUN echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/bullseye.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends libssl1.1 && \
+    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/bullseye.list
 
 # Create non‑root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# Copy only production node_modules (includes workspace symlinks)
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+# Create minimal root package.json WITHOUT "type": "module" for npm workspaces
+RUN echo '{"private":true,"workspaces":["apps/api-node","packages/db","packages/shared"]}' > package.json
+
+# Copy package manifests for production install (only workspace packages, NOT root)
+COPY --chown=nodejs:nodejs apps/api-node/package.json apps/api-node/package.json
+COPY --chown=nodejs:nodejs packages/db/package.json packages/db/package.json
+COPY --chown=nodejs:nodejs packages/shared/package.json packages/shared/package.json
+
+# Install ONLY production dependencies for api-node (creates proper symlinks to built packages)
+RUN npm install --omit=dev --legacy-peer-deps --workspace=@cc-ops/api-node
+
+# Copy built workspace packages
+COPY --from=builder --chown=nodejs:nodejs /app/packages/db/dist ./packages/db/dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/src ./packages/shared/src
 
 # Copy the compiled API app
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api-node/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/apps/api-node/package.json ./package.json
-
-# Copy built workspace packages to their expected locations
-COPY --from=builder --chown=nodejs:nodejs /app/packages/db/dist ./packages/db/dist
-COPY --from=builder --chown=nodejs:nodejs /app/packages/db/package.json ./packages/db/package.json
-COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/src ./packages/shared/src
-COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/package.json ./packages/shared/package.json
 
 # Copy openapi.yaml for runtime usage
 COPY --from=builder --chown=nodejs:nodejs /app/apps/api-node/openapi.yaml ./openapi.yaml

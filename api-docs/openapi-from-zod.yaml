@@ -2,7 +2,7 @@
 openapi: 3.0.3
 info:
   title: CC Ops API
-  version: 1.0.0
+  version: 0.1.0
   description: API generated from Zod validation schemas.
 servers:
   - url: http://localhost:4000

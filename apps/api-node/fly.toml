@@ -4,3 +4,18 @@ primary_region = 'iad'
 [build]
   dockerfile = "Dockerfile"
   context = ".."
+
+[http_service]
+  internal_port = 4000
+  force_https = false
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "10s"
+    timeout = "5s"
+    method = "get"
+    path = "/health"
+    grace_period = "10s"
