@@ -66,7 +66,7 @@ export async function getCleaningJob(id: string) {
  * Create a new cleaning job.
  */
 export async function createCleaningJob(data: CreateCleaningJobInput) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const prismaData: any = {
     propertyId: data.propertyId,
     bookingId: data.bookingId ?? null,
@@ -95,7 +95,7 @@ export async function createCleaningJob(data: CreateCleaningJobInput) {
  * Update an existing cleaning job.
  */
 export async function updateCleaningJob(id: string, data: UpdateCleaningJobInput) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const updateInfo: any = {};
   if (data.propertyId !== undefined) updateInfo.propertyId = data.propertyId;
   if (data.bookingId !== undefined) updateInfo.bookingId = data.bookingId;

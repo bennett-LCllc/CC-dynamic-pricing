@@ -64,7 +64,7 @@ export async function getLawnJob(id: string) {
  * Create a new lawn job.
  */
 export async function createLawnJob(data: CreateLawnJobInput) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const prismaData: any = {
     propertyId: data.propertyId,
     crewId: data.crewId ?? null,
@@ -89,7 +89,7 @@ export async function createLawnJob(data: CreateLawnJobInput) {
  * Update an existing lawn job.
  */
 export async function updateLawnJob(id: string, data: UpdateLawnJobInput) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const updateInfo: any = {};
   if (data.propertyId !== undefined) updateInfo.propertyId = data.propertyId;
   if (data.crewId !== undefined) updateInfo.crewId = data.crewId;

@@ -4,7 +4,7 @@
  * Run with: npm run db:seed
  */
 
-import { PrismaClient, Platform, BookingStatus, PropertyStatus } from '@prisma/client';
+import { PrismaClient, Platform, BookingStatus } from '@prisma/client';
 import { addDays, addHours } from 'date-fns';
 import bcrypt from 'bcryptjs';
 

@@ -18,7 +18,15 @@ export default tseslint.config(
       },
     },
     rules: {
-      // Add any project-specific linting rules here
+      // Disable strict any checking for now (legacy code)
+      '@typescript-eslint/no-explicit-any': 'off',
+      // Allow unused vars with underscore prefix
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }],
+      // Allow namespaces (used for Express type augmentation)
+      '@typescript-eslint/no-namespace': 'off',
     },
   },
   {
