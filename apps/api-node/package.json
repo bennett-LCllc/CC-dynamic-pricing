@@ -7,8 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "eslint . --ext .ts,.js --max-warnings 0",
-    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "lint": "eslint src --ext .ts,.js --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.js --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

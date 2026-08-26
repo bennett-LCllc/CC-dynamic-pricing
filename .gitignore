@@ -48,3 +48,4 @@ agent-context/*
 
 # OpenAPI generated file (keep openapi-from-zod.yaml as source of truth)
 apps/api-node/openapi.yaml
+.vercel
