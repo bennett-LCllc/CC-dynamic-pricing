@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build --filter=@cc-ops/web",
+  "buildCommand": "npx turbo run build --filter=@cc-ops/web --filter=@cc-ops/db",
   "devCommand": "npm run dev --filter=@cc-ops/web",
   "installCommand": "npm install --workspaces --legacy-peer-deps",
   "framework": "nextjs",
