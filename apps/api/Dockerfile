@@ -32,6 +32,8 @@ COPY --from=base /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY apps/api/src ./src
+COPY packages/shared ./packages/shared
+COPY packages/db ./packages/db
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash appuser
@@ -40,7 +42,8 @@ USER appuser
 # Environment
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8000
+    PORT=8000 \
+    PYTHONPATH=/app
 
 EXPOSE 8000
 

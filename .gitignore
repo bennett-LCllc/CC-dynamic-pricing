@@ -49,3 +49,15 @@ agent-context/*
 # OpenAPI generated file (keep openapi-from-zod.yaml as source of truth)
 apps/api-node/openapi.yaml
 .vercel
+docs
+
+#skills
+.agents
+.claude/skills
+.kiro
+
+# Python
+.venv
+.venv/
+__pycache__/
+*.pyc

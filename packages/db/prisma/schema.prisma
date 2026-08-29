@@ -196,8 +196,27 @@ model PricingSnapshot {
 }
 
 // ============================================================
-// Cleaning Business
+// AirDNA market snapshot cache (external market features)
 // ============================================================
+
+model MarketSnapshot {
+  id              String   @id @default(cuid())
+  locationKey     String   // AirDNA location key (e.g. "tX--qFk2C9")
+  monthRangeStart String   // "YYYY-MM" window start
+  monthRangeEnd   String   // "YYYY-MM" window end
+  adr             Decimal  @db.Decimal(8, 2)
+  occupancyRate   Decimal  @db.Decimal(4, 2) // 0-1
+  revpar          Decimal  @db.Decimal(8, 2)
+  demand          Decimal  @db.Decimal(6, 2) // avg booked nights / month
+  numMonths       Int      @default(1)
+  source          String   @default("AIRDNA")
+  createdAt       DateTime @default(now())
+
+  @@unique([locationKey, monthRangeStart, monthRangeEnd])
+  @@index([locationKey])
+}
+
+
 
 model Cleaner {
   id          String   @id @default(cuid())

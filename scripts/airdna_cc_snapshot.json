@@ -1,0 +1,175 @@
+{
+  "locationKey": "airdna-609",
+  "monthRangeStart": "2025-08",
+  "monthRangeEnd": "2026-07",
+  "adr": 227.85,
+  "occupancyRate": 0.4823,
+  "revpar": 116.14,
+  "demand": 14.47,
+  "numMonths": 12,
+  "_source": "HAR extraction (bearer expired; live pull pending fresh token)",
+  "_series": {
+    "adr": [
+      {
+        "date": "2025-08-01",
+        "avg_daily_rate": 274.14
+      },
+      {
+        "date": "2025-09-01",
+        "avg_daily_rate": 215.34
+      },
+      {
+        "date": "2025-10-01",
+        "avg_daily_rate": 205.47
+      },
+      {
+        "date": "2025-11-01",
+        "avg_daily_rate": 179.05
+      },
+      {
+        "date": "2025-12-01",
+        "avg_daily_rate": 166.18
+      },
+      {
+        "date": "2026-01-01",
+        "avg_daily_rate": 146.94
+      },
+      {
+        "date": "2026-02-01",
+        "avg_daily_rate": 162.46
+      },
+      {
+        "date": "2026-03-01",
+        "avg_daily_rate": 242.31
+      },
+      {
+        "date": "2026-04-01",
+        "avg_daily_rate": 221.3
+      },
+      {
+        "date": "2026-05-01",
+        "avg_daily_rate": 263.66
+      },
+      {
+        "date": "2026-06-01",
+        "avg_daily_rate": 324.54
+      },
+      {
+        "date": "2026-07-01",
+        "avg_daily_rate": 332.76
+      }
+    ],
+    "occupancy": [
+      {
+        "date": "2025-08-01",
+        "rate": 50.6
+      },
+      {
+        "date": "2025-09-01",
+        "rate": 35.96
+      },
+      {
+        "date": "2025-10-01",
+        "rate": 41.94
+      },
+      {
+        "date": "2025-11-01",
+        "rate": 37.42
+      },
+      {
+        "date": "2025-12-01",
+        "rate": 31.79
+      },
+      {
+        "date": "2026-01-01",
+        "rate": 36.02
+      },
+      {
+        "date": "2026-02-01",
+        "rate": 52.32
+      },
+      {
+        "date": "2026-03-01",
+        "rate": 58.29
+      },
+      {
+        "date": "2026-04-01",
+        "rate": 42.02
+      },
+      {
+        "date": "2026-05-01",
+        "rate": 51.51
+      },
+      {
+        "date": "2026-06-01",
+        "rate": 66.48
+      },
+      {
+        "date": "2026-07-01",
+        "rate": 74.46
+      }
+    ],
+    "revpar": [
+      {
+        "date": "2025-08-01",
+        "revpar": 138.73,
+        "percentile": null
+      },
+      {
+        "date": "2025-09-01",
+        "revpar": 77.44,
+        "percentile": null
+      },
+      {
+        "date": "2025-10-01",
+        "revpar": 86.18,
+        "percentile": null
+      },
+      {
+        "date": "2025-11-01",
+        "revpar": 67.0,
+        "percentile": null
+      },
+      {
+        "date": "2025-12-01",
+        "revpar": 52.83,
+        "percentile": null
+      },
+      {
+        "date": "2026-01-01",
+        "revpar": 52.93,
+        "percentile": null
+      },
+      {
+        "date": "2026-02-01",
+        "revpar": 85.0,
+        "percentile": null
+      },
+      {
+        "date": "2026-03-01",
+        "revpar": 141.24,
+        "percentile": null
+      },
+      {
+        "date": "2026-04-01",
+        "revpar": 92.99,
+        "percentile": null
+      },
+      {
+        "date": "2026-05-01",
+        "revpar": 135.81,
+        "percentile": null
+      },
+      {
+        "date": "2026-06-01",
+        "revpar": 215.75,
+        "percentile": null
+      },
+      {
+        "date": "2026-07-01",
+        "revpar": 247.78,
+        "percentile": null
+      }
+    ]
+  }
+}
