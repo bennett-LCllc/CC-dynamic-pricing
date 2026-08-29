@@ -15,7 +15,7 @@ import hashlib
 
 import numpy as np
 import pandas as pd
-from prisma_client import Prisma
+from prisma import Prisma
 
 # Add project root to path for shared constants
 import sys
@@ -64,11 +64,15 @@ def _make_market_client() -> "tuple[AirDNAClient, MarketSnapshotCache, bool]":
 
 
 def get_property_type(property_obj) -> str:
-    """Map Property model to pricing engine property types."""
-    if property_obj.isBeachfront:
-        return "BEACHFRONT"
-    # Could add more logic based on amenities, location, etc.
-    return "STANDARD"
+    """Map Property model to pricing engine property types.
+
+    Property.type is a PropertyType enum (HOUSE/CONDO/TOWNHOUSE/...);
+    surface it as a string for downstream floor/ceiling lookups.
+    """
+    ptype = getattr(property_obj, "type", None)
+    if ptype is None:
+        return "STANDARD"
+    return str(ptype)
 
 
 def calculate_event_multiplier(target_date: date) -> Decimal:
@@ -251,7 +255,7 @@ async def build_training_examples(
                 
                 # Active rules
                 active_rules = get_active_rules_for_date(prop.id, current_date)
-                
+
                 # Create training example
                 example_data = {
                     "bookingId": booking_for_night.id if booking_for_night else None,
@@ -266,13 +270,16 @@ async def build_training_examples(
                     "eventMultiplier": event_mult,
                     "occupancyRate14d": occ_rate,
                     "competitorAvgRate": None,  # Would need external data
-                    "activeRules": active_rules if active_rules else None,
                     "wasBooked": is_booked,
                     "finalRate": final_rate,
                     "revenue": final_rate * Decimal(str((booking_for_night.checkOut - booking_for_night.checkIn).days)) if booking_for_night and final_rate else None,
                     "dataSource": "ACTUAL",
                     "weight": Decimal("1.0"),
                 }
+                # prisma-client-py rejects explicit None on optional Json fields;
+                # only include activeRules when there are actual rules.
+                if active_rules:
+                    example_data["activeRules"] = active_rules
 
                 # Merge AirDNA market features (graceful: None => marketDataAvailable=False)
                 apply_market_features(example_data, prop_metrics)
@@ -299,17 +306,18 @@ async def build_training_examples(
 
 
 async def _bulk_insert_examples(examples: List[Dict]) -> int:
-    """Bulk insert training examples, skipping duplicates."""
-    # Use create_many with skip_duplicates (requires unique constraint)
-    # For now, use individual creates with try/except
+    """Bulk insert training examples, skipping true duplicates."""
     created = 0
     for ex in examples:
         try:
             await prisma.pricingtrainingexample.create(data=ex)
             created += 1
         except Exception as e:
-            # Skip duplicates (unique constraint on propertyId+stayDate+dataSource would help)
-            pass
+            # Surface the error instead of silently swallowing it.
+            # (Genuine unique-constraint duplicates would be caught here too,
+            # but masking all errors has hidden real failures.)
+            import sys as _sys
+            print(f"[bulk_insert] FAILED on propertyId={ex.get('propertyId')} stayDate={ex.get('stayDate')}: {type(e).__name__}: {e}", file=_sys.stderr)
     return created
 
 

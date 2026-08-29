@@ -763,3 +763,50 @@ model Settings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ============================================================
+// MLOps — Pricing training examples (schema drift fix: model was
+// previously only present in migration 20260827143812; now declared
+// in the canonical schema so generated clients expose it).
+// ============================================================
+
+enum DataSource {
+  ACTUAL
+  SYNTHETIC
+  AUGMENTED
+}
+
+model PricingTrainingExample {
+  id               String    @id @default(cuid())
+  bookingId        String?
+  propertyId       String
+  propertyType     String
+  bedrooms         Int
+  baseRate         Decimal   @db.Decimal(8, 2)
+  stayDate         DateTime  @db.Date
+  dayOfWeek        Int
+  month            Int
+  isHoliday        Boolean   @default(false)
+  eventMultiplier  Decimal   @db.Decimal(4, 2) @default(1.0)
+  occupancyRate14d Decimal   @db.Decimal(4, 2)
+  competitorAvgRate Decimal? @db.Decimal(8, 2)
+  activeRules      Json?
+  wasBooked        Boolean
+  finalRate        Decimal?  @db.Decimal(8, 2)
+  revenue          Decimal?  @db.Decimal(10, 2)
+  dataSource       DataSource @default(ACTUAL)
+  weight           Decimal   @db.Decimal(4, 2) @default(1.0)
+
+  // AirDNA market-feature merge (populated by apply_market_features)
+  marketAdr              Decimal? @db.Decimal(8, 2)
+  marketOccupancyRate   Decimal? @db.Decimal(4, 2)
+  marketRevpar          Decimal? @db.Decimal(8, 2)
+  marketDemand          Decimal? @db.Decimal(6, 2)
+  marketDemandIndex     Decimal? @db.Decimal(6, 2)
+  marketDataAvailable   Boolean   @default(false)
+
+  createdAt        DateTime  @default(now())
+
+  @@index([propertyId])
+  @@index([stayDate])
+}
