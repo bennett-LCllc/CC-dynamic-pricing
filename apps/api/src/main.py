@@ -7,6 +7,11 @@ Run with: uvicorn src.main:app --reload --port 8000
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.pricing.routes import router as pricing_router
+from src.ml.server import app as ml_app
+from src.sentry_setup import init_sentry
+
+# Initialize Sentry before the app is built (no-op unless SENTRY_DSN is set).
+init_sentry()
 
 app = FastAPI(
     title="CC Ops — Pricing Engine",
@@ -28,6 +33,7 @@ app.add_middleware(
 
 # Routes
 app.include_router(pricing_router)
+app.mount("/ml", ml_app)
 
 
 @app.get("/health")
@@ -45,5 +51,9 @@ async def root():
             "forecast": "POST /api/pricing/forecast",
             "seasonal_multipliers": "GET /api/pricing/seasonal-multipliers",
             "events": "GET /api/pricing/events",
+            "ml_price": "POST /ml/price",
+            "ml_forecast": "POST /ml/forecast",
+            "ml_models": "GET /ml/models",
+            "ml_promote": "POST /ml/models/{model_id}/promote",
         },
     }
