@@ -2,7 +2,7 @@
 
 **Project:** CC Ops (3 LLCs: STR, Lawn, Cleaning)  
 **Stack:** Turborepo monorepo — Next.js 14 (Vercel) + Express API (Fly.io) + FastAPI ML Pricing (Fly.io) + Prisma/Postgres (Neon)  
-**Last Updated:** 2026-08-28  
+**Last Updated:** 2026-08-29  
 **Owner:** Michael Bennett
 
 ---
@@ -53,9 +53,40 @@
 | Pricing API (Fly) | `https://cc-ops-pricing.fly.dev` | `/health`    | `fly logs -a cc-ops-pricing` |
 | Database          | Neon dashboard                   | `SELECT 1`   | Neon logs                    |
 
-**Repo:** `/Users/michael.bennett@cognitedata.com/corpus-christi-ops`  
-**Package Manager:** `yarn` (workspaces)  
-**Node:** 20.x | **Python:** 3.12
+**Repo:** `/Users/michael.bennett@cognitedata.com/corpus-christi-ops` \n**Package Manager:** `yarn` (workspaces) \n**Node:** 20.x | **Python:** 3.12
+
+> **Python toolchain note (ML pipeline):** the FastAPI pricing app and the
+> `src/ml/*` feature builders require a **Python 3.12** virtualenv. Python 3.13
+> fails to build `pydantic-core` (its bundled PyO3 caps at 3.12), so create the
+> venv explicitly on 3.12:
+>
+> ```bash
+> cd apps/api
+> /opt/homebrew/bin/python3.12 -m venv .venv   # or: pyenv local 3.12 && python -m venv .venv
+> source .venv/bin/activate
+> pip install -r requirements.txt
+> ```
+>
+> The TypeScript `prisma` client is generated from `packages/db/prisma/schema.prisma`
+> (provider `prisma-client-js`). The **Python** client needs the `prisma-client-py`
+> provider, which is NOT in the canonical schema. To generate it locally, copy the
+> schema with a Python generator block, generate, then copy the client into the
+> venv (the generated client is **not** committed — `.venv/` is gitignored):
+>
+> ```bash
+> cd apps/api
+> # make a throwaway copy whose generator is prisma-client-py + enable_experimental_decimal
+> python3 - <<'PY'
+> import re
+> src = open("../packages/db/prisma/schema.prisma").read()
+> gen = 'generator client {\n  provider = "prisma-client-py"\n  output = "./generated/client"\n  enable_experimental_decimal = true\n}\n'
+> src = re.sub(r'generator client \{.*?\n\}', gen, src, count=1, flags=re.S)
+> open(".prisma-gen/schema.prisma", "w").write(src)
+> PY
+> export PATH="$PWD/.venv/bin:$PATH"
+> prisma generate --schema .prisma-gen/schema.prisma
+> cp -r .prisma-gen/generated/client/* .venv/lib/python3.12/site-packages/prisma/
+> ```
 
 ---
 
@@ -82,7 +113,7 @@ cd packages/db && npx prisma generate && cd ../..
 cd packages/db && npx prisma db push && cd ../..
 
 # Seed database
-cd packages/db && npx prisma db seed && cd ../..
+cd packages/db && npm run db:seed && cd ../..
 ```
 
 ### Run All Services Locally
@@ -457,6 +488,58 @@ curl -X POST https://cc-ops-pricing.fly.dev/api/pricing/calculate \
 fly logs -a cc-ops-pricing | grep -i "feature\|predict\|error"
 ```
 
+### 8.5 ML Feature Pipeline (`build_training_examples`)
+
+The pricing model trains on nightly examples built from historical bookings.
+The builder lives in `apps/api/src/ml/build_features.py` and writes rows to the
+**`PricingTrainingExample`** table (added to `schema.prisma` on 2026-08-29 — it
+had previously existed only in a migration, which is why the generated client
+could not see it).
+
+```bash
+cd apps/api
+source .venv/bin/activate
+export $(grep -v '^#' ../../.env | xargs)   # DATABASE_URL etc.
+
+# Build + persist training examples (2-year window by default)
+python -c "import asyncio; from src.ml.build_features import build_training_examples; \
+  print(asyncio.run(build_training_examples()))"
+# -> {"status": "success", "total_examples": <N>}
+```
+
+**What it does**
+
+- Reads `Booking` / `Property` rows, iterates each night in the window, and
+  emits one example per (property, night) — both booked (positive) and
+  available-but-not-booked (negative) samples.
+- Merges AirDNA market features via `apply_market_features()`
+  (`marketAdr`, `marketOccupancyRate`, `marketRevpar`, `marketDemand`,
+  `marketDemandIndex`, `marketDataAvailable`). With **no `AIRDNA_API_KEY`** the
+  merge degrades gracefully and every example gets `marketDataAvailable = False`.
+- Persists to `PricingTrainingExample`.
+
+**Known gotchas (all resolved 2026-08-29, kept here so they don't recur)**
+
+- `prisma-client-py` rejects an explicit `None` on an optional `Json` field
+  (`activeRules`); the builder only includes `activeRules` when non-empty.
+- `_bulk_insert_examples()` previously swallowed every exception with a bare
+  `except: pass`, masking failures as `total_examples: 0`. It now logs the
+  failing example + error to stderr.
+- Python client MUST be generated with `enable_experimental_decimal = true`
+  (the schema uses `Decimal` for money columns).
+
+**AirDNA MLOps integration**
+
+- `apps/api/src/ml/airdna_client.py` — `AirDNAClient` (injectable transport;
+  raises `AirDNAUnavailable` on missing key / network error).
+- `apps/api/src/ml/market_features.py` — `apply_market_features()` merge +
+  `MarketSnapshotCache` protocol + `DictSnapshotCache`.
+- `packages/db/prisma/schema.prisma` — `MarketSnapshot` model (cache backing the
+  client) + `PricingTrainingExample` (training rows).
+- To go live with real market data: set `AIRDNA_API_KEY`, implement a Prisma-
+  backed `MarketSnapshotCache`, wire a nightly scheduler, and ensure `train.py`
+  includes the new market columns. AirDNA is PAID — budget before enabling.
+
 ---
 
 ## 9. Incident Response
@@ -563,7 +646,7 @@ npx prisma db push        # Push schema (dev)
 npx prisma migrate dev    # Create + apply migration
 npx prisma migrate deploy # Apply migrations (prod)
 npx prisma studio         # Open GUI
-npx prisma db seed        # Run seed.ts
+npx prisma db seed        # Run seed.ts (NOTE: real command is `npm run db:seed`)
 
 # ── Fly.io ────────────────────────────────────────────
 fly status -a cc-ops-api
@@ -601,8 +684,9 @@ docker run -p 8000:8000 --env-file apps/api/.env cc-ops-pricing
 ├── .env.example                  # Environment template
 ├── packages/
 │   ├── db/
-│   │   ├── prisma/schema.prisma  # Database schema (18 models)
-│   │   ├── prisma/seed.ts        # Seed data
+│   │   ├── prisma/schema.prisma  # Database schema (STR/Lawn/Cleaning + MLOps:
+│   │   │                        #   PricingTrainingExample, MarketSnapshot, etc.)
+│   │   ├── prisma/seed.ts        # Seed data (2 props, 4 bookings, admin)
 │   │   └── package.json
 │   ├── shared/
 │   │   └── src/
@@ -628,11 +712,17 @@ docker run -p 8000:8000 --env-file apps/api/.env cc-ops-pricing
 │       ├── src/
 │       │   ├── main.py           # FastAPI app
 │       │   ├── pricing/          # Static pricing engine
-│       │   └── ml/               # ML model server
+│       │   ├── ml/               # ML model server + feature pipeline
+│       │   │   ├── build_features.py      # build_training_examples() -> PricingTrainingExample
+│       │   │   ├── airdna_client.py       # AirDNA market-data client
+│       │   │   ├── market_features.py     # apply_market_features() merge
+│       │   │   ├── server.py               # ML model serving
+│       │   │   └── train.py                # Model training entry point
+│       │   └── sentry_setup.py     # Sentry init (all 3 apps monitored)
 │       ├── Dockerfile
 │       ├── fly.toml
 │       └── requirements.txt
-└── scripts/                      # Utility scripts
+└── scripts/                      # Utility scripts (incl. pull_airdna.py, extract_airdna_from_har.py)
 ```
 
 ---
