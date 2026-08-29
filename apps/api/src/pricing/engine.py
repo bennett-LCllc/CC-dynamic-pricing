@@ -117,7 +117,8 @@ def calculate_nightly_rate(
     seasonal_mult = SEASONAL_MULTIPLIERS.get(month_key, Decimal("1.0"))
 
     # 2. Day-of-week multiplier
-    dow_mult = DOW_MULTIPLIERS.get(target_date.weekday(), Decimal("1.0"))
+    # DOW_MULTIPLIERS is keyed 0=Sunday..6=Saturday (isoweekday % 7), not date.weekday()
+    dow_mult = DOW_MULTIPLIERS.get(target_date.isoweekday() % 7, Decimal("1.0"))
 
     # 3. Event multiplier
     event_mult = Decimal("1.0")
@@ -159,8 +160,8 @@ def calculate_nightly_rate(
                 continue
             if rule.get("end_date") and target_date > rule["end_date"]:
                 continue
-            # Check day of week
-            if rule.get("day_of_week") and target_date.weekday() not in rule["day_of_week"]:
+            # Check day of week (rule keys use 0=Sunday..6=Saturday, matching DOW_MULTIPLIERS)
+            if rule.get("day_of_week") and (target_date.isoweekday() % 7) not in rule["day_of_week"]:
                 continue
 
             adj_type = rule.get("adjustment_type", "PERCENTAGE")

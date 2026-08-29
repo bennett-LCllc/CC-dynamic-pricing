@@ -13,6 +13,7 @@
   "scripts": {
     "generate:openapi": "ts-node scripts/generate-openapi.ts",
     "test": "vitest run",
+    "test:api": "cd apps/api && python -m pytest tests -q",
     "lint": "npm run lint -w @cc-ops/db -w @cc-ops/shared -w @cc-ops/api-node -w @cc-ops/web",
     "type-check": "npm run typecheck -w @cc-ops/db -w @cc-ops/shared -w @cc-ops/api-node -w @cc-ops/web",
     "build": "npm run db:generate -w @cc-ops/db && npm run build -w @cc-ops/db -w @cc-ops/api-node -w @cc-ops/web"
