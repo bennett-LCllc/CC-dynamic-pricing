@@ -13,6 +13,10 @@
     },
     "lint": {},
     "typecheck": {},
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
     "db:generate": {
       "cache": false
     },

@@ -46,7 +46,16 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
+      - uses: actions/setup-python@8d9ed9a600a15bcb811d7366288d5f5bdac48fb
+        with:
+          python-version: '3.12'
       - run: npm ci
+      - name: Install Python deps (pricing engine tests)
+        run: |
+          cd apps/api
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
       - run: npm run test
 
   build:
