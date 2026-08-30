@@ -48,6 +48,19 @@ agent-context/*
 
 # OpenAPI generated file (keep openapi-from-zod.yaml as source of truth)
 apps/api-node/openapi.yaml
+
+# Generated Prisma client (prisma-client-py dumps this on every generate)
+apps/api/.prisma-gen/
+
+# Stray dev artifacts (not source)
+apps/api/show_example.py
+instrumentation.ts
+instrumentation-client.ts
+next.config.mjs
+pages/
+sentry.edge.config.ts
+sentry.server.config.ts
+
 .vercel
 docs
 
