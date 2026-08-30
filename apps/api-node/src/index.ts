@@ -60,8 +60,7 @@ app.get('/metrics', metricsHandler);
 setupSwagger(app);
 
 // Global auth middleware for all /api routes except /api/v1/auth/login and /api/v1/auth/register.
-// NOTE: Express strips the mount prefix, so req.path for "/api/v1/auth/login" is "/auth/login".
-// Match on req.originalUrl (the unstripped path) so the exemption actually fires.
+// The auth router is mounted at /api/v1/auth, so exempt those exact paths.
 app.use('/api', (req, res, next) => {
   const url = req.originalUrl;
   if (url.startsWith('/api/v1/auth/login') || url.startsWith('/api/v1/auth/register')) {

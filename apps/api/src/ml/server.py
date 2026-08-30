@@ -21,7 +21,7 @@ import pandas as pd
 from prisma import Prisma
 
 # Import pricing constants from the engine (for fallback and feature parity)
-from apps.api.src.pricing.engine import (
+from src.pricing.engine import (
     SEASONAL_MULTIPLIERS,
     DOW_MULTIPLIERS,
     MAJOR_EVENTS,
