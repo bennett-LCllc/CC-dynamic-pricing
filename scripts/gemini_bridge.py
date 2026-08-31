@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
-"""Minimal Hermes <-> Gemini bridge (no SDK, just the REST endpoint)."""
+"""Minimal Hermes <-> Gemini bridge (no SDK, just the REST endpoint).
+
+Uses the cheaper flash tier by default. Override with GEMINI_MODEL env var
+(e.g. GEMINI_MODEL=gemini-flash-latest for the cheapest, or gemini-3.6-flash
+for the latest). Key is read from ~/.config/gemini/key (never hardcoded).
+"""
 import json
 import os
 import sys
 import urllib.request
 
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+# Cheapest stable flash tier. Override via GEMINI_MODEL env if needed.
+GEMINI_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    f"{os.environ.get('GEMINI_MODEL', 'gemini-flash-latest')}:generateContent"
+)
 
 
 def ask(prompt: str, model_url: str = GEMINI_URL) -> str:
