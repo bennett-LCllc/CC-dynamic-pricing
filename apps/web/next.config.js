@@ -5,6 +5,9 @@ const nextConfig = {
   transpilePackages: ['@cc-ops/shared', '@cc-ops/db'],
   experimental: {
     typedRoutes: true,
+    // Required for @sentry/nextjs v7 auto-initialization via instrumentation.ts
+    // (stable as `instrumentation` in Next 15+; opt-in here for 14.2.x).
+    instrumentationHook: true,
   },
   // Enable source maps for better Sentry error stacks
   productionBrowserSourceMaps: true,
