@@ -171,7 +171,7 @@ def prepare_inference_features(
     
     # Calculate same features as training
     seasonal_mult = float(SEASONAL_MULTIPLIERS.get(str(target_date.month), Decimal("1.0")))
-    dow_mult = float(DOW_MULTIPLIERS.get(target_date.weekday(), Decimal("1.0")))
+    dow_mult = float(DOW_MULTIPLIERS.get(target_date.isoweekday() % 7, Decimal("1.0")))
     
     # Event multiplier
     event_mult = 1.0
@@ -343,7 +343,7 @@ async def calculate_price(request: PricingRequest):
     
     # Also calculate static multipliers for transparency
     seasonal_mult = float(SEASONAL_MULTIPLIERS.get(str(target_date.month), Decimal("1.0")))
-    dow_mult = float(DOW_MULTIPLIERS.get(target_date.weekday(), Decimal("1.0")))
+    dow_mult = float(DOW_MULTIPLIERS.get(target_date.isoweekday() % 7, Decimal("1.0")))
     
     event_mult = 1.0
     for event in MAJOR_EVENTS:

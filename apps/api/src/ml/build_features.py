@@ -244,7 +244,7 @@ async def build_training_examples(
                 
                 # Calculate features
                 seasonal_mult = SEASONAL_MULTIPLIERS.get(str(current_date.month), Decimal("1.0"))
-                dow_mult = DOW_MULTIPLIERS.get(current_date.weekday(), Decimal("1.0"))
+                dow_mult = DOW_MULTIPLIERS.get(current_date.isoweekday() % 7, Decimal("1.0"))
                 event_mult = calculate_event_multiplier(current_date)
                 occ_rate = calculate_occupancy_rate(bookings, current_date, prop.id)
                 
