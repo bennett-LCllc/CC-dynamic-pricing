@@ -17,6 +17,37 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function getCsrfToken(): string | null {
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/cc-ops-csrf-token=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  return null;
+}
+
+async function authFetch(url: string, init?: RequestInit): Promise<Response> {
+  const csrfToken = getCsrfToken();
+  const headers = new Headers(init?.headers);
+  if (csrfToken) {
+    headers.set('x-csrf-token', csrfToken);
+  }
+  return fetch(url, { ...init, headers, credentials: 'include' });
+}
+
+async function attemptRefreshToken(): Promise<boolean> {
+  try {
+    const res = await authFetch(`${API_URL}/api/v1/auth/refresh`, {
+      method: 'POST',
+    });
+    if (res.ok) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,9 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          credentials: 'include', // send httpOnly cookie
-        });
+        const res = await authFetch(`${API_URL}/api/v1/auth/me`);
         if (res.ok) {
           const json = await res.json();
           setUser(json.data);
@@ -43,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
+    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // cookie set by server
@@ -59,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (data: { name?: string; email: string; password: string }) => {
-    const res = await fetch(`${API_URL}/api/auth/register`, {
+    const res = await fetch(`${API_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -75,22 +104,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await fetch(`${API_URL}/api/auth/logout`, {
+    await authFetch(`${API_URL}/api/v1/auth/logout`, {
       method: 'POST',
-      credentials: 'include',
     });
-    // Clear CSRF token on logout
     setUser(null);
     setCsrfToken(null);
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const res = await fetch(`${API_URL}/api/auth/me`, {
-      credentials: 'include',
-    });
+    const res = await authFetch(`${API_URL}/api/v1/auth/me`);
     if (res.ok) {
       const json = await res.json();
       setUser(json.data);
+    } else if (res.status === 401) {
+      // Token expired — try refresh
+      const refreshed = await attemptRefreshToken();
+      if (refreshed) {
+        // Set a new CSRF token from the refreshed cookie
+        setCsrfToken(getCsrfToken());
+        const meRes = await authFetch(`${API_URL}/api/v1/auth/me`);
+        if (meRes.ok) {
+          const json = await meRes.json();
+          setUser(json.data);
+        }
+      } else {
+        setUser(null);
+        setCsrfToken(null);
+      }
     }
   }, []);
 

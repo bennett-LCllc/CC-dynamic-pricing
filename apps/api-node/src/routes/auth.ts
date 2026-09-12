@@ -1,16 +1,19 @@
 /**
- * Auth routes — login, register, session, user management.
+ * Auth routes — login, register, session, token refresh, user management.
  */
 
 import { prisma } from '@cc-ops/db';
 import { Request, Response, Router } from 'express';
 import { z } from 'zod';
+import { auditLog } from '../auditLogger';
 import { authMiddleware } from '../middleware/auth';
 import {
   COOKIE_NAME,
   COOKIE_OPTIONS,
   CSRF_COOKIE_NAME,
   CSRF_COOKIE_OPTIONS,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_OPTIONS,
   generateCsrfToken,
 } from '../middleware/cookies';
 import { authRateLimiter } from '../middleware/rateLimiter';
@@ -18,9 +21,11 @@ import {
   authenticateUser,
   createUser,
   deleteUser,
-  generateToken,
+  generateAccessToken,
+  generateRefreshToken,
   getUserById,
   listUsers,
+  rotateRefreshToken,
   updateUser,
 } from '../services/auth';
 
@@ -69,26 +74,48 @@ router.post('/login', async (req: Request, res: Response) => {
   try {
     const user = await authenticateUser(parsed.data.email, parsed.data.password);
     if (!user) {
+      auditLog('user.login', {
+        req,
+        userEmail: parsed.data.email,
+        success: false,
+        reason: 'invalid credentials',
+      });
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
 
-    const token = generateToken({
+    const tokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
       tokenVersion: user.tokenVersion,
-    });
+    };
 
-    // Set JWT in httpOnly cookie — prevents XSS theft
-    // Generate CSRF token for double-submit protection
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+
+    // Set JWT access token in httpOnly cookie — prevents XSS theft
     const csrfToken = generateCsrfToken();
-    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.cookie(COOKIE_NAME, accessToken, COOKIE_OPTIONS);
+    res.cookie(REFRESH_COOKIE_NAME, refreshToken, REFRESH_COOKIE_OPTIONS);
     res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+
+    auditLog('user.login', {
+      req,
+      userId: user.id,
+      userEmail: user.email,
+      success: true,
+    });
 
     // Return user without the token — it's now in the cookie
     res.json({ data: { user, csrfToken } });
   } catch (err) {
+    auditLog('user.login', {
+      req,
+      userEmail: parsed.data.email,
+      success: false,
+      reason: err instanceof Error ? err.message : 'unknown error',
+    });
     console.error('POST /api/auth/login error:', err);
     res.status(500).json({ error: 'Login failed' });
   }
@@ -109,17 +136,29 @@ router.post('/register', async (req: Request, res: Response) => {
     await getUserById(parsed.data.email).catch(() => null);
     // Check by email uniqueness via create catch
     const user = await createUser(parsed.data);
-    const token = generateToken({
+    const tokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
       tokenVersion: 0,
-    });
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
 
     // Set JWT in httpOnly cookie + CSRF token
     const csrfToken = generateCsrfToken();
-    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.cookie(COOKIE_NAME, accessToken, COOKIE_OPTIONS);
+    res.cookie(REFRESH_COOKIE_NAME, refreshToken, REFRESH_COOKIE_OPTIONS);
     res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+
+    auditLog('user.register', {
+      req,
+      userId: user.id,
+      userEmail: user.email,
+      success: true,
+      details: { role: user.role },
+    });
 
     res.status(201).json({ data: { user, csrfToken } });
   } catch (err) {
@@ -128,18 +167,90 @@ router.post('/register', async (req: Request, res: Response) => {
       res.status(409).json({ error: 'A user with this email already exists' });
       return;
     }
+    auditLog('user.register', {
+      req,
+      userEmail: parsed.data.email,
+      success: false,
+      reason: err instanceof Error ? err.message : 'unknown error',
+    });
     console.error('POST /api/auth/register error:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 });
 
 /* -------------------------------------------------------------------------- */
-/*  GET /api/auth/me                                                          */
+/*  POST /api/auth/refresh                                                    */
 /* -------------------------------------------------------------------------- */
 
-router.post('/logout', (_req: Request, res: Response) => {
+router.post('/refresh', async (req: Request, res: Response) => {
+  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+
+  if (!refreshToken) {
+    res.status(401).json({ error: 'Refresh token missing' });
+    return;
+  }
+
+  const result = await rotateRefreshToken(refreshToken);
+  if (!result.user) {
+    // Token was invalid, revoked, or already rotated — force re-login
+    res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+    res.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS);
+    res.clearCookie(CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS);
+    auditLog('user.token_refresh', {
+      req,
+      success: false,
+      reason: 'invalid or revoked refresh token',
+    });
+    res.status(401).json({ error: 'Invalid or expired refresh token' });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: result.user.id },
+    select: { tokenVersion: true },
+  });
+
+  const newPayload = {
+    userId: result.user.id,
+    email: result.user.email,
+    role: result.user.role,
+    tokenVersion: user!.tokenVersion,
+  };
+
+  const accessToken = generateAccessToken(newPayload);
+  const newCsrfToken = generateCsrfToken();
+
+  res.cookie(COOKIE_NAME, accessToken, COOKIE_OPTIONS);
+  res.cookie(CSRF_COOKIE_NAME, newCsrfToken, CSRF_COOKIE_OPTIONS);
+
+  auditLog('user.token_refresh', {
+    req,
+    userId: result.user.id,
+    success: true,
+  });
+
+  res.json({ data: { user: result.user, csrfToken: newCsrfToken } });
+});
+
+/* -------------------------------------------------------------------------- */
+/*  POST /api/auth/logout                                                     */
+/* -------------------------------------------------------------------------- */
+
+router.post('/logout', (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  const userEmail = req.user?.email;
+
   res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+  res.clearCookie(REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS);
   res.clearCookie(CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS);
+
+  auditLog('user.logout', {
+    req,
+    userId,
+    userEmail,
+    success: true,
+  });
+
   res.json({ data: { success: true } });
 });
 
@@ -188,14 +299,42 @@ router.put('/users/:id', authMiddleware, async (req: Request, res: Response) => 
 
   // Non-admin users cannot change roles
   if (req.user!.role !== 'ADMIN' && parsed.data.role !== undefined) {
+    auditLog('admin.user_update', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      success: false,
+      reason: 'non-admin attempted role change',
+    });
     res.status(403).json({ error: 'Only admins can change user roles' });
     return;
   }
 
   try {
+    const targetUser = await getUserById(req.params.id);
     const data = await updateUser(req.params.id, parsed.data);
+
+    auditLog('admin.user_update', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      targetUserEmail: targetUser?.email,
+      success: true,
+      details: { changedFields: Object.keys(parsed.data) },
+    });
+
     res.json({ data });
   } catch (err) {
+    auditLog('admin.user_update', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      success: false,
+      reason: err instanceof Error ? err.message : 'unknown error',
+    });
     console.error(`PUT /api/auth/users/${req.params.id} error:`, err);
     res.status(500).json({ error: 'Failed to update user' });
   }
@@ -207,6 +346,14 @@ router.put('/users/:id', authMiddleware, async (req: Request, res: Response) => 
 
 router.delete('/users/:id', authMiddleware, async (req: Request, res: Response) => {
   if (req.user!.role !== 'ADMIN') {
+    auditLog('admin.user_delete', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      success: false,
+      reason: 'non-admin attempted user deletion',
+    });
     res.status(403).json({ error: 'Only admins can delete users' });
     return;
   }
@@ -221,14 +368,41 @@ router.delete('/users/:id', authMiddleware, async (req: Request, res: Response) 
     if (targetUser.role === 'ADMIN') {
       const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
       if (adminCount <= 1) {
+        auditLog('admin.user_delete', {
+          req,
+          userId: req.user!.userId,
+          userEmail: req.user!.email,
+          targetUserId: req.params.id,
+          targetUserEmail: targetUser.email,
+          success: false,
+          reason: 'cannot delete last admin',
+        });
         res.status(403).json({ error: 'Cannot delete the last admin account' });
         return;
       }
     }
 
     await deleteUser(req.params.id);
+
+    auditLog('admin.user_delete', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      targetUserEmail: targetUser.email,
+      success: true,
+    });
+
     res.json({ success: true });
   } catch (err) {
+    auditLog('admin.user_delete', {
+      req,
+      userId: req.user!.userId,
+      userEmail: req.user!.email,
+      targetUserId: req.params.id,
+      success: false,
+      reason: err instanceof Error ? err.message : 'unknown error',
+    });
     console.error(`DELETE /api/auth/users/${req.params.id} error:`, err);
     res.status(500).json({ error: 'Failed to delete user' });
   }

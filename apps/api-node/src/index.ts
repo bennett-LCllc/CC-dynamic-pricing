@@ -63,6 +63,7 @@ app.use(
       ? process.env.ALLOWED_ORIGINS.split(',')
       : ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true, // Required for cookies to work cross-origin
+    exposedHeaders: ['x-csrf-token'],
   }),
 );
 app.use(cookieParser());
@@ -81,9 +82,12 @@ app.use(apiRateLimiter);
 app.use('/api', (req, res, next) => {
   const url = req.originalUrl;
   if (
-    ['/api/v1/auth/login', '/api/v1/auth/register', '/api/v1/auth/logout'].some((p) =>
-      url.startsWith(p),
-    )
+    [
+      '/api/v1/auth/login',
+      '/api/v1/auth/register',
+      '/api/v1/auth/logout',
+      '/api/v1/auth/refresh',
+    ].some((p) => url.startsWith(p))
   ) {
     return next();
   }
@@ -105,7 +109,12 @@ setupSwagger(app);
 // The auth router is mounted at /api/v1/auth, so exempt those exact paths.
 app.use('/api', (req, res, next) => {
   const url = req.originalUrl;
-  if (url.startsWith('/api/v1/auth/login') || url.startsWith('/api/v1/auth/register')) {
+  if (
+    url.startsWith('/api/v1/auth/login') ||
+    url.startsWith('/api/v1/auth/register') ||
+    url.startsWith('/api/v1/auth/refresh') ||
+    url.startsWith('/api/v1/auth/logout')
+  ) {
     next();
     return;
   }

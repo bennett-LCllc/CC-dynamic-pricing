@@ -11,21 +11,84 @@ if (!JWT_SECRET) {
   console.error('FATAL: JWT_SECRET environment variable is required');
   process.exit(1);
 }
-const JWT_EXPIRES_IN = '1h';
+
+// 15-minute access tokens — short enough to limit blast radius,
+// paired with refresh tokens that rotate and self-invalidate.
+const JWT_EXPIRES_IN = '15m';
+// Refresh tokens live 7 days and rotate on each use.
+const REFRESH_EXPIRES_IN = '7d';
 
 export interface TokenPayload {
   userId: string;
   email: string | null;
   role: string;
   tokenVersion: number;
+  type: 'access' | 'refresh';
 }
 
-export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+export function generateAccessToken(payload: Omit<TokenPayload, 'type'>): string {
+  return jwt.sign({ ...payload, type: 'access' }, JWT_SECRET!, {
+    expiresIn: JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
+}
+
+export function generateRefreshToken(payload: Omit<TokenPayload, 'type'>): string {
+  return jwt.sign({ ...payload, type: 'refresh' }, JWT_SECRET!, {
+    expiresIn: REFRESH_EXPIRES_IN,
+  } as jwt.SignOptions);
+}
+
+export function generateToken(payload: Omit<TokenPayload, 'type'>): string {
+  return generateAccessToken(payload);
 }
 
 export function verifyToken(token: string): TokenPayload {
   return jwt.verify(token, JWT_SECRET!) as TokenPayload;
+}
+
+export async function rotateRefreshToken(
+  refreshToken: string,
+): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  user: { id: string; name: string | null; email: string | null; role: string } | null;
+}> {
+  try {
+    const payload = verifyToken(refreshToken);
+    if (payload.type !== 'refresh') {
+      return { accessToken: '', refreshToken: '', user: null };
+    }
+
+    // tokenVersion rotation: fetch current DB version; if payload.version
+    // doesn't match, the token was already rotated (or revoked) — reject.
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+    });
+    if (!user || user.tokenVersion !== payload.tokenVersion) {
+      return { accessToken: '', refreshToken: '', user: null };
+    }
+
+    // Bump tokenVersion so the old refresh token is invalidated
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { tokenVersion: { increment: 1 } },
+    });
+
+    const newPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion + 1,
+    };
+
+    return {
+      accessToken: generateAccessToken(newPayload),
+      refreshToken: generateRefreshToken(newPayload),
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    };
+  } catch {
+    return { accessToken: '', refreshToken: '', user: null };
+  }
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -39,14 +102,26 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 export async function authenticateUser(
   email: string,
   password: string,
-): Promise<{ id: string; name: string | null; email: string | null; role: string; tokenVersion: number } | null> {
+): Promise<{
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: string;
+  tokenVersion: number;
+} | null> {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) return null;
 
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role, tokenVersion: user.tokenVersion };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    tokenVersion: user.tokenVersion,
+  };
 }
 
 export async function createUser(data: {

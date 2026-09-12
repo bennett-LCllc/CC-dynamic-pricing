@@ -119,21 +119,21 @@ export async function getEvents() {
 // ============================================================
 
 export async function getProperties(): Promise<PropertyListItem[]> {
-  const res = await fetch(`${API_URL}/api/properties`);
+  const res = await authFetch(`${API_URL}/api/properties`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getProperty(id: string): Promise<Property> {
-  const res = await fetch(`${API_URL}/api/properties/${id}`);
+  const res = await authFetch(`${API_URL}/api/properties/${id}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createProperty(data: CreatePropertyInput): Promise<Property> {
-  const res = await fetch(`${API_URL}/api/properties`, {
+  const res = await authFetch(`${API_URL}/api/properties`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -147,7 +147,7 @@ export async function createProperty(data: CreatePropertyInput): Promise<Propert
 }
 
 export async function updateProperty(id: string, data: UpdatePropertyInput): Promise<Property> {
-  const res = await fetch(`${API_URL}/api/properties/${id}`, {
+  const res = await authFetch(`${API_URL}/api/properties/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -161,7 +161,7 @@ export async function updateProperty(id: string, data: UpdatePropertyInput): Pro
 }
 
 export async function deleteProperty(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/properties/${id}`, {
+  const res = await authFetch(`${API_URL}/api/properties/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -230,7 +230,7 @@ export interface DashboardData {
 }
 
 export async function getDashboardOverview(): Promise<DashboardData> {
-  const res = await fetch(`${API_URL}/api/dashboard/overview`);
+  const res = await authFetch(`${API_URL}/api/dashboard/overview`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -252,7 +252,7 @@ export async function getBookings(params?: {
   if (params?.from) sp.set('from', params.from);
   if (params?.to) sp.set('to', params.to);
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/bookings${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/bookings${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -265,21 +265,21 @@ export async function getBookingsCalendar(params: {
 }): Promise<Booking[]> {
   const sp = new URLSearchParams({ from: params.from, to: params.to });
   if (params.propertyId) sp.set('propertyId', params.propertyId);
-  const res = await fetch(`${API_URL}/api/bookings/calendar?${sp}`);
+  const res = await authFetch(`${API_URL}/api/bookings/calendar?${sp}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getBooking(id: string): Promise<Booking> {
-  const res = await fetch(`${API_URL}/api/bookings/${id}`);
+  const res = await authFetch(`${API_URL}/api/bookings/${id}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createBooking(data: CreateBookingInput): Promise<Booking> {
-  const res = await fetch(`${API_URL}/api/bookings`, {
+  const res = await authFetch(`${API_URL}/api/bookings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -293,7 +293,7 @@ export async function createBooking(data: CreateBookingInput): Promise<Booking> 
 }
 
 export async function updateBooking(id: string, data: UpdateBookingInput): Promise<Booking> {
-  const res = await fetch(`${API_URL}/api/bookings/${id}`, {
+  const res = await authFetch(`${API_URL}/api/bookings/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -307,7 +307,7 @@ export async function updateBooking(id: string, data: UpdateBookingInput): Promi
 }
 
 export async function deleteBooking(id: string): Promise<Booking> {
-  const res = await fetch(`${API_URL}/api/bookings/${id}`, {
+  const res = await authFetch(`${API_URL}/api/bookings/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -327,21 +327,21 @@ export async function getCleaningJobs(filters?: CleaningJobFilters): Promise<Cle
   if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
   if (filters?.toDate) sp.set('toDate', filters.toDate);
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/cleaning/jobs${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getCleaningJob(id: string): Promise<CleaningJob> {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`);
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs/${id}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createCleaningJob(data: CreateCleaningJobInput): Promise<CleaningJob> {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs`, {
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -358,7 +358,7 @@ export async function updateCleaningJob(
   id: string,
   data: UpdateCleaningJobInput,
 ): Promise<CleaningJob> {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`, {
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -372,7 +372,7 @@ export async function updateCleaningJob(
 }
 
 export async function deleteCleaningJob(id: string): Promise<CleaningJob> {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs/${id}`, {
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -384,7 +384,7 @@ export async function submitCleaningChecklist(
   jobId: string,
   tasks: Record<string, boolean>,
 ): Promise<CleaningChecklist> {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/checklist`, {
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs/${jobId}/checklist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(tasks),
@@ -401,7 +401,7 @@ export async function addCleaningPhoto(
   jobId: string,
   data: { url: string; category?: string; sortOrder?: number },
 ) {
-  const res = await fetch(`${API_URL}/api/cleaning/jobs/${jobId}/photos`, {
+  const res = await authFetch(`${API_URL}/api/cleaning/jobs/${jobId}/photos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -415,7 +415,7 @@ export async function addCleaningPhoto(
 }
 
 export async function getCleaners(): Promise<Cleaner[]> {
-  const res = await fetch(`${API_URL}/api/cleaning/cleaners`);
+  const res = await authFetch(`${API_URL}/api/cleaning/cleaners`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -433,21 +433,21 @@ export async function getLawnJobs(filters?: LawnJobFilters): Promise<LawnJob[]> 
   if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
   if (filters?.toDate) sp.set('toDate', filters.toDate);
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/lawn/jobs${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/lawn/jobs${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getLawnJob(id: string): Promise<LawnJob> {
-  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`);
+  const res = await authFetch(`${API_URL}/api/lawn/jobs/${id}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createLawnJob(data: CreateLawnJobInput): Promise<LawnJob> {
-  const res = await fetch(`${API_URL}/api/lawn/jobs`, {
+  const res = await authFetch(`${API_URL}/api/lawn/jobs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -461,7 +461,7 @@ export async function createLawnJob(data: CreateLawnJobInput): Promise<LawnJob> 
 }
 
 export async function updateLawnJob(id: string, data: UpdateLawnJobInput): Promise<LawnJob> {
-  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`, {
+  const res = await authFetch(`${API_URL}/api/lawn/jobs/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -475,7 +475,7 @@ export async function updateLawnJob(id: string, data: UpdateLawnJobInput): Promi
 }
 
 export async function deleteLawnJob(id: string): Promise<LawnJob> {
-  const res = await fetch(`${API_URL}/api/lawn/jobs/${id}`, {
+  const res = await authFetch(`${API_URL}/api/lawn/jobs/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -484,7 +484,7 @@ export async function deleteLawnJob(id: string): Promise<LawnJob> {
 }
 
 export async function getLawnCrews(): Promise<LawnCrew[]> {
-  const res = await fetch(`${API_URL}/api/lawn/crews`);
+  const res = await authFetch(`${API_URL}/api/lawn/crews`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -495,7 +495,7 @@ export async function getLawnCrews(): Promise<LawnCrew[]> {
 // ============================================================
 
 export async function getFinancialOverview(): Promise<FinancialOverview> {
-  const res = await fetch(`${API_URL}/api/financials/overview`);
+  const res = await authFetch(`${API_URL}/api/financials/overview`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -504,7 +504,7 @@ export async function getFinancialOverview(): Promise<FinancialOverview> {
 export async function getLLCFinancials(
   type: 'STR' | 'LAWN' | 'CLEANING',
 ): Promise<{ revenue: number; expenses: number; netIncome: number }> {
-  const res = await fetch(`${API_URL}/api/financials/llc/${type}`);
+  const res = await authFetch(`${API_URL}/api/financials/llc/${type}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -518,14 +518,14 @@ export async function getExpenses(filters?: ExpenseFilters): Promise<Expense[]> 
   if (filters?.fromDate) sp.set('fromDate', filters.fromDate);
   if (filters?.toDate) sp.set('toDate', filters.toDate);
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/financials/expenses${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/financials/expenses${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createExpense(data: CreateExpenseInput): Promise<Expense> {
-  const res = await fetch(`${API_URL}/api/financials/expenses`, {
+  const res = await authFetch(`${API_URL}/api/financials/expenses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -539,7 +539,7 @@ export async function createExpense(data: CreateExpenseInput): Promise<Expense> 
 }
 
 export async function updateExpense(id: string, data: UpdateExpenseInput): Promise<Expense> {
-  const res = await fetch(`${API_URL}/api/financials/expenses/${id}`, {
+  const res = await authFetch(`${API_URL}/api/financials/expenses/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -553,7 +553,7 @@ export async function updateExpense(id: string, data: UpdateExpenseInput): Promi
 }
 
 export async function deleteExpense(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/financials/expenses/${id}`, {
+  const res = await authFetch(`${API_URL}/api/financials/expenses/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -564,7 +564,7 @@ export async function deleteExpense(id: string): Promise<void> {
 // ============================================================
 
 export async function getMessageTemplates(): Promise<MessageTemplate[]> {
-  const res = await fetch(`${API_URL}/api/messages/templates`);
+  const res = await authFetch(`${API_URL}/api/messages/templates`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
@@ -573,7 +573,7 @@ export async function getMessageTemplates(): Promise<MessageTemplate[]> {
 export async function createMessageTemplate(
   data: CreateMessageTemplateInput,
 ): Promise<MessageTemplate> {
-  const res = await fetch(`${API_URL}/api/messages/templates`, {
+  const res = await authFetch(`${API_URL}/api/messages/templates`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -590,7 +590,7 @@ export async function updateMessageTemplate(
   id: string,
   data: UpdateMessageTemplateInput,
 ): Promise<MessageTemplate> {
-  const res = await fetch(`${API_URL}/api/messages/templates/${id}`, {
+  const res = await authFetch(`${API_URL}/api/messages/templates/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -604,7 +604,7 @@ export async function updateMessageTemplate(
 }
 
 export async function deleteMessageTemplate(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/messages/templates/${id}`, {
+  const res = await authFetch(`${API_URL}/api/messages/templates/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -617,21 +617,21 @@ export async function getMessages(filters?: MessageFilters): Promise<GuestMessag
   if (filters?.channel) sp.set('channel', filters.channel);
   if (filters?.automated !== undefined) sp.set('automated', String(filters.automated));
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/messages${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/messages${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getBookingMessages(bookingId: string): Promise<GuestMessage[]> {
-  const res = await fetch(`${API_URL}/api/messages/booking/${bookingId}`);
+  const res = await authFetch(`${API_URL}/api/messages/booking/${bookingId}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function sendMessage(data: CreateMessageInput): Promise<GuestMessage> {
-  const res = await fetch(`${API_URL}/api/messages`, {
+  const res = await authFetch(`${API_URL}/api/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -645,7 +645,7 @@ export async function sendMessage(data: CreateMessageInput): Promise<GuestMessag
 }
 
 export async function deleteMessage(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/messages/${id}`, {
+  const res = await authFetch(`${API_URL}/api/messages/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -661,21 +661,21 @@ export async function getCustomers(filters?: CustomerFilters): Promise<CustomerS
   if (filters?.type) sp.set('type', filters.type);
   if (filters?.status) sp.set('status', filters.status);
   const qs = sp.toString();
-  const res = await fetch(`${API_URL}/api/customers${qs ? '?' + qs : ''}`);
+  const res = await authFetch(`${API_URL}/api/customers${qs ? '?' + qs : ''}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function getCustomer(id: string): Promise<Customer> {
-  const res = await fetch(`${API_URL}/api/customers/${id}`);
+  const res = await authFetch(`${API_URL}/api/customers/${id}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;
 }
 
 export async function createCustomer(data: CreateCustomerInput): Promise<Customer> {
-  const res = await fetch(`${API_URL}/api/customers`, {
+  const res = await authFetch(`${API_URL}/api/customers`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -689,7 +689,7 @@ export async function createCustomer(data: CreateCustomerInput): Promise<Custome
 }
 
 export async function updateCustomer(id: string, data: UpdateCustomerInput): Promise<Customer> {
-  const res = await fetch(`${API_URL}/api/customers/${id}`, {
+  const res = await authFetch(`${API_URL}/api/customers/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -703,7 +703,7 @@ export async function updateCustomer(id: string, data: UpdateCustomerInput): Pro
 }
 
 export async function deleteCustomer(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/api/customers/${id}`, {
+  const res = await authFetch(`${API_URL}/api/customers/${id}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -714,7 +714,7 @@ export async function deleteCustomer(id: string): Promise<void> {
 // ============================================================
 
 export async function login(data: AuthLoginInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/api/auth/login`, {
+  const res = await authFetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -728,7 +728,7 @@ export async function login(data: AuthLoginInput): Promise<AuthResponse> {
 }
 
 export async function register(data: AuthRegisterInput): Promise<AuthResponse> {
-  const res = await fetch(`${API_URL}/api/auth/register`, {
+  const res = await authFetch(`${API_URL}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -781,7 +781,7 @@ export async function deleteUserApi(id: string): Promise<void> {
 // ============================================================
 
 export async function getSettings(): Promise<SettingsMap> {
-  const res = await fetch(`${API_URL}/api/settings`);
+  const res = await authFetch(`${API_URL}/api/settings`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   const json = await res.json();
   return json.data;

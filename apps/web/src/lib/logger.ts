@@ -94,12 +94,22 @@ export const logger = isBrowser
       redact: {
         paths: [
           '*.password',
+          '*.passwordHash',
           '*.token',
           '*.secret',
           '*.apiKey',
           '*.api_key',
           '*.authorization',
           '*.cookie',
+          // PII redaction — prevent emails, phone numbers, and SSNs
+          // from leaking into Sentry/Loki logs
+          '*.email',
+          '*.user.email',
+          '*.targetUserEmail',
+          '*.userEmail',
+          '*.phone',
+          '*.phone_number',
+          '*.ssn',
         ],
         censor: '[REDACTED]',
       },

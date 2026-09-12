@@ -30,6 +30,7 @@ export const logger = pino({
   redact: {
     paths: [
       '*.password',
+      '*.passwordHash',
       '*.token',
       '*.secret',
       '*.apiKey',
@@ -40,6 +41,12 @@ export const logger = pino({
       'req.headers.authorization',
       'req.headers.cookie',
       'res.headers["set-cookie"]',
+      // PII patterns — redact email addresses, phone numbers, and SSNs
+      // that may appear in user objects or request bodies
+      '*.email',
+      '*.user.email',
+      '*.targetUserEmail',
+      '*.userEmail',
     ],
     censor: '[REDACTED]',
   },

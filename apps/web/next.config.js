@@ -33,13 +33,24 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+          // CORS origin is set dynamically by middleware/_middleware to echo
+          // only allowlisted origins — never a wildcard when credentials are used.
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
           {
             key: 'Access-Control-Allow-Methods',
             value: 'GET,POST,PUT,DELETE,OPTIONS',
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Crosssell-Token, X-Request-ID, X-Correlation-ID',
+            value:
+              'Content-Type, Authorization, X-Crosssell-Token, X-Request-ID, X-Correlation-ID, x-csrf-token',
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400',
           },
         ],
       },
