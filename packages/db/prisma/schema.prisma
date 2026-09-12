@@ -388,6 +388,8 @@ model Customer {
   stripeCustomerId String?
   notes       String?
 
+  tokenBudgets TokenBudget[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -701,6 +703,9 @@ model User {
   passwordHash  String?
   role          UserRole  @default(ADMIN)
   tokenVersion  Int       @default(0)
+  customerId    String?
+
+  @@index([customerId])
 
   accounts      Account[]
   sessions      Session[]
@@ -809,4 +814,27 @@ model PricingTrainingExample {
 
   @@index([propertyId])
   @@index([stayDate])
+}
+
+// ============================================================
+// LLM Token Budgets — per-customer rate limiting
+// ============================================================
+
+enum BudgetWindow {
+  DAILY
+  MONTHLY
+}
+
+model TokenBudget {
+  id          String      @id @default(cuid())
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  window      BudgetWindow
+  limit       Int       // max tokens for this window
+  used        Int       @default(0) // consumed tokens in current window
+  resetAt     DateTime  // next reset time (lazy reset on access)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([customerId, window])
 }

@@ -16,6 +16,7 @@ import { metricsHandler, metricsMiddleware } from './metrics';
 import { authMiddleware } from './middleware/auth';
 import { csrfProtection } from './middleware/csrf';
 import { apiRateLimiter } from './middleware/rateLimiter';
+import { tokenBudgetMiddleware } from './middleware/tokenBudget';
 import authRoutes from './routes/auth';
 import bookingRoutes from './routes/bookings';
 import cleaningRoutes from './routes/cleaning';
@@ -23,6 +24,7 @@ import customerRoutes from './routes/customers';
 import dashboardRoutes from './routes/dashboard';
 import financialsRoutes from './routes/financials';
 import lawnRoutes from './routes/lawn';
+import llmRoutes from './routes/llm';
 import messageRoutes from './routes/messages';
 import propertyRoutes from './routes/properties';
 import settingsRoutes from './routes/settings';
@@ -132,6 +134,8 @@ app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/settings', settingsRoutes);
+// LLM routes — gated by per-customer token budget
+app.use('/api/v1/llm', authMiddleware, tokenBudgetMiddleware(), llmRoutes);
 // app.use('/api/v1/expenses', expenseRoutes);
 // app.use('/api/v1/webhooks', webhookRoutes);
 

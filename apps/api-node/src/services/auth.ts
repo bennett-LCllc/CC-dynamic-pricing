@@ -24,6 +24,7 @@ export interface TokenPayload {
   role: string;
   tokenVersion: number;
   type: 'access' | 'refresh';
+  customerId?: string | null;
 }
 
 export function generateAccessToken(payload: Omit<TokenPayload, 'type'>): string {
@@ -46,9 +47,7 @@ export function verifyToken(token: string): TokenPayload {
   return jwt.verify(token, JWT_SECRET!) as TokenPayload;
 }
 
-export async function rotateRefreshToken(
-  refreshToken: string,
-): Promise<{
+export async function rotateRefreshToken(refreshToken: string): Promise<{
   accessToken: string;
   refreshToken: string;
   user: { id: string; name: string | null; email: string | null; role: string } | null;
@@ -108,6 +107,7 @@ export async function authenticateUser(
   email: string | null;
   role: string;
   tokenVersion: number;
+  customerId: string | null;
 } | null> {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) return null;
@@ -121,6 +121,7 @@ export async function authenticateUser(
     email: user.email,
     role: user.role,
     tokenVersion: user.tokenVersion,
+    customerId: user.customerId ?? null,
   };
 }
 

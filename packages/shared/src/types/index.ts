@@ -2,9 +2,21 @@
 // Core Platform Types
 // ============================================================
 
-export type PropertyType = 'HOUSE' | 'CONDO' | 'TOWNHOUSE' | 'DUPLEX' | 'TRIPLEX' | 'APARTMENT' | 'CABIN';
+export type PropertyType =
+  'HOUSE' | 'CONDO' | 'TOWNHOUSE' | 'DUPLEX' | 'TRIPLEX' | 'APARTMENT' | 'CABIN';
 export type PropertyStatus = 'ACTIVE' | 'INACTIVE' | 'UNDER_RENOVATION' | 'SOLD';
-export type PhotoCategory = 'EXTERIOR' | 'INTERIOR' | 'KITCHEN' | 'BATHROOM' | 'BEDROOM' | 'LIVING_ROOM' | 'POOL' | 'YARD' | 'DAMAGE' | 'BEFORE_AFTER' | 'OTHER';
+export type PhotoCategory =
+  | 'EXTERIOR'
+  | 'INTERIOR'
+  | 'KITCHEN'
+  | 'BATHROOM'
+  | 'BEDROOM'
+  | 'LIVING_ROOM'
+  | 'POOL'
+  | 'YARD'
+  | 'DAMAGE'
+  | 'BEFORE_AFTER'
+  | 'OTHER';
 
 export interface PropertyPhoto {
   id: string;
@@ -161,7 +173,8 @@ export interface CreateBookingInput {
 export type UpdateBookingInput = Partial<CreateBookingInput>;
 
 export type Platform = 'AIRBNB' | 'VRBO' | 'BOOKING_COM' | 'DIRECT';
-export type BookingStatus = 'INQUIRY' | 'CONFIRMED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+export type BookingStatus =
+  'INQUIRY' | 'CONFIRMED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
 export type BookingSource = 'AIRBNB' | 'VRBO' | 'BOOKING_COM' | 'DIRECT' | 'REFERRAL';
 
 export interface PropertySummary {
@@ -183,7 +196,7 @@ export interface PropertySummary {
 export interface BookingSummary {
   id: string;
   guestName: string;
-  checkIn: string;  // ISO date
+  checkIn: string; // ISO date
   checkOut: string; // ISO date
   nightlyRate: number;
   totalAmount: number;
@@ -192,13 +205,28 @@ export interface BookingSummary {
   guestCount: number;
 }
 
-export type CleaningType = 'TURNOVER' | 'DEEP_CLEAN' | 'MOVE_IN_OUT' | 'MID_STAY' | 'POST_CONSTRUCTION';
-export type JobStatus = 'PENDING' | 'SCHEDULED' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'ISSUE_REPORTED' | 'QUALITY_CHECK';
+export type CleaningType =
+  'TURNOVER' | 'DEEP_CLEAN' | 'MOVE_IN_OUT' | 'MID_STAY' | 'POST_CONSTRUCTION';
+export type JobStatus =
+  | 'PENDING'
+  | 'SCHEDULED'
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'ISSUE_REPORTED'
+  | 'QUALITY_CHECK';
 
 export interface CleaningJobSummary {
   id: string;
   propertyId: string;
-  property?: { id: string; name: string; address?: string | null; slug?: string; zipCode?: string } | null;
+  property?: {
+    id: string;
+    name: string;
+    address?: string | null;
+    slug?: string;
+    zipCode?: string;
+  } | null;
   bookingId?: string | null;
   booking?: { id: string; guestName: string; checkIn: string; checkOut: string } | null;
   scheduledStart: string;
@@ -215,7 +243,13 @@ export interface CleaningJobSummary {
 export interface CleaningJob {
   id: string;
   propertyId: string;
-  property?: { id: string; name: string; address?: string | null; slug?: string; zipCode?: string } | null;
+  property?: {
+    id: string;
+    name: string;
+    address?: string | null;
+    slug?: string;
+    zipCode?: string;
+  } | null;
   bookingId?: string | null;
   booking?: { id: string; guestName: string; checkIn: string; checkOut: string } | null;
   scheduledStart: string;
@@ -325,7 +359,13 @@ export interface LawnPhoto {
 export interface LawnJob {
   id: string;
   propertyId: string;
-  property?: { id: string; name: string; address: string | null; slug: string; zipCode: string } | null;
+  property?: {
+    id: string;
+    name: string;
+    address: string | null;
+    slug: string;
+    zipCode: string;
+  } | null;
   crewId: string | null;
   crew: LawnCrew | null;
   scheduledDate: string;
@@ -510,10 +550,21 @@ export interface FinancialOverview {
 
 export type CustomerType = 'STR_OWNER' | 'PM_COMPANY' | 'RESIDENTIAL' | 'COMMERCIAL';
 export type CustomerStatus = 'ACTIVE' | 'INACTIVE' | 'CHURNED';
-export type LotSize = 'EIGHTH_ACRE' | 'QUARTER_ACRE' | 'HALF_ACRE' | 'ACRE' | 'LARGE' | 'COMMERCIAL';
+export type LotSize =
+  'EIGHTH_ACRE' | 'QUARTER_ACRE' | 'HALF_ACRE' | 'ACRE' | 'LARGE' | 'COMMERCIAL';
 export type LawnPackage = 'BASIC' | 'STANDARD' | 'PREMIUM' | 'SHOWCASE';
 export type CleaningFrequency = 'PER_TURNOVER' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY';
-export type ServiceType = 'MOW' | 'EDGE' | 'TRIM' | 'FERTILIZE' | 'WEED_CONTROL' | 'AERATE' | 'OVERSEED' | 'LEAF_REMOVAL' | 'PRESSURE_WASH' | 'FULL_SERVICE';
+export type ServiceType =
+  | 'MOW'
+  | 'EDGE'
+  | 'TRIM'
+  | 'FERTILIZE'
+  | 'WEED_CONTROL'
+  | 'AERATE'
+  | 'OVERSEED'
+  | 'LEAF_REMOVAL'
+  | 'PRESSURE_WASH'
+  | 'FULL_SERVICE';
 
 export interface CustomerProperty {
   id: string;
@@ -743,6 +794,7 @@ export interface User {
   name: string | null;
   email: string | null;
   role: UserRole;
+  customerId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -782,4 +834,21 @@ export interface SettingEntry {
 
 export interface SettingsMap {
   [key: string]: string;
+}
+
+// ============================================================
+// LLM Token Budget Types
+// ============================================================
+
+export type BudgetWindow = 'DAILY' | 'MONTHLY';
+
+export interface TokenBudget {
+  id: string;
+  customerId: string;
+  window: BudgetWindow;
+  limit: number;
+  used: number;
+  resetAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
