@@ -7,6 +7,14 @@ import { Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import {
+  COOKIE_NAME,
+  COOKIE_OPTIONS,
+  CSRF_COOKIE_NAME,
+  CSRF_COOKIE_OPTIONS,
+  generateCsrfToken,
+} from '../middleware/cookies';
+import { authRateLimiter } from '../middleware/rateLimiter';
+import {
   authenticateUser,
   createUser,
   deleteUser,
@@ -17,6 +25,10 @@ import {
 } from '../services/auth';
 
 const router = Router();
+
+// Apply strict rate limiting to login/register to prevent brute force
+router.use('/login', authRateLimiter);
+router.use('/register', authRateLimiter);
 
 /* -------------------------------------------------------------------------- */
 /*  Zod schemas                                                                */
@@ -67,7 +79,15 @@ router.post('/login', async (req: Request, res: Response) => {
       role: user.role,
       tokenVersion: user.tokenVersion,
     });
-    res.json({ data: { token, user } });
+
+    // Set JWT in httpOnly cookie — prevents XSS theft
+    // Generate CSRF token for double-submit protection
+    const csrfToken = generateCsrfToken();
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+
+    // Return user without the token — it's now in the cookie
+    res.json({ data: { user, csrfToken } });
   } catch (err) {
     console.error('POST /api/auth/login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -95,7 +115,13 @@ router.post('/register', async (req: Request, res: Response) => {
       role: user.role,
       tokenVersion: 0,
     });
-    res.status(201).json({ data: { token, user } });
+
+    // Set JWT in httpOnly cookie + CSRF token
+    const csrfToken = generateCsrfToken();
+    res.cookie(COOKIE_NAME, token, COOKIE_OPTIONS);
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+
+    res.status(201).json({ data: { user, csrfToken } });
   } catch (err) {
     const message = err instanceof Error ? err.message : '';
     if (message.includes('Unique constraint') || message.includes('unique')) {
@@ -105,6 +131,16 @@ router.post('/register', async (req: Request, res: Response) => {
     console.error('POST /api/auth/register error:', err);
     res.status(500).json({ error: 'Registration failed' });
   }
+});
+
+/* -------------------------------------------------------------------------- */
+/*  GET /api/auth/me                                                          */
+/* -------------------------------------------------------------------------- */
+
+router.post('/logout', (_req: Request, res: Response) => {
+  res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
+  res.clearCookie(CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS);
+  res.json({ data: { success: true } });
 });
 
 /* -------------------------------------------------------------------------- */

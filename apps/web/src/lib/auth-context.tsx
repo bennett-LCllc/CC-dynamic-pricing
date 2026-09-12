@@ -1,55 +1,52 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User } from '@cc-ops/shared';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name?: string; email: string; password: string }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  csrfToken: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
+  // Bootstrap session: check cookies on mount by hitting /me
   useEffect(() => {
-    const savedToken = localStorage.getItem('cc-ops-token');
-    if (savedToken) {
-      setToken(savedToken);
-      // Validate token + fetch user
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${savedToken}` },
-      })
-        .then((res) => {
-          if (res.ok) return res.json();
-          throw new Error('Invalid token');
-        })
-        .then((json) => {
+    const bootstrap = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          credentials: 'include', // send httpOnly cookie
+        });
+        if (res.ok) {
+          const json = await res.json();
           setUser(json.data);
-        })
-        .catch(() => {
-          localStorage.removeItem('cc-ops-token');
-          setToken(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+        }
+      } catch {
+        // Not authenticated — that's fine
+      } finally {
+        setLoading(false);
+      }
+    };
+    bootstrap();
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // cookie set by server
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
@@ -57,17 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(err.error || 'Login failed');
     }
     const json = await res.json();
-    const { token: newToken, user: newUser } = json.data;
-    localStorage.setItem('cc-ops-token', newToken);
-    setToken(newToken);
-    setUser(newUser);
+    setUser(json.data.user);
+    setCsrfToken(json.data.csrfToken);
   }, []);
 
   const register = useCallback(async (data: { name?: string; email: string; password: string }) => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -75,32 +70,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(err.error || 'Registration failed');
     }
     const json = await res.json();
-    const { token: newToken, user: newUser } = json.data;
-    localStorage.setItem('cc-ops-token', newToken);
-    setToken(newToken);
-    setUser(newUser);
+    setUser(json.data.user);
+    setCsrfToken(json.data.csrfToken);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('cc-ops-token');
-    setToken(null);
+  const logout = useCallback(async () => {
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    // Clear CSRF token on logout
     setUser(null);
+    setCsrfToken(null);
   }, []);
 
   const refreshUser = useCallback(async () => {
-    if (!token) return;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     const res = await fetch(`${API_URL}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     });
     if (res.ok) {
       const json = await res.json();
       setUser(json.data);
     }
-  }, [token]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, refreshUser, csrfToken }}
+    >
       {children}
     </AuthContext.Provider>
   );

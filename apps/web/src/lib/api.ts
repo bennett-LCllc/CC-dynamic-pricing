@@ -51,16 +51,23 @@ import type {
   User,
 } from '@cc-ops/shared';
 
-function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('cc-ops-token');
+function getCsrfToken(): string | null {
+  // Read from the AuthContext — but for module-level fetch we need a different approach.
+  // The CSRF token is also set as a non-httpOnly cookie, so we can read that.
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/cc-ops-csrf-token=([^;]+)/);
+    return match ? match[1] : null;
+  }
+  return null;
 }
 
 async function authFetch(url: string, init?: RequestInit): Promise<Response> {
-  const token = getAuthToken();
+  const csrfToken = getCsrfToken();
   const headers = new Headers(init?.headers);
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  return fetch(url, { ...init, headers });
+  if (csrfToken) {
+    headers.set('x-csrf-token', csrfToken);
+  }
+  return fetch(url, { ...init, headers, credentials: 'include' });
 }
 
 export async function calculateRate(params: {

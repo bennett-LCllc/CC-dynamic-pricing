@@ -1,9 +1,14 @@
 /**
- * Auth middleware — verifies JWT Bearer token and attaches user to request.
+ * Auth middleware — verifies JWT from httpOnly cookie (or Bearer header)
+ * and attaches user to request.
+ *
+ * Tokens are read from the httpOnly cookie primarily, with the Bearer
+ * header as a fallback for API client tools / scripts.
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { verifyToken, type TokenPayload } from '../services/auth';
+import { COOKIE_NAME } from './cookies';
 
 declare global {
   namespace Express {
@@ -14,13 +19,14 @@ declare global {
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // Prefer cookie, fall back to Authorization header
+  const token = req.cookies?.[COOKIE_NAME] ?? req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
     res.status(401).json({ error: 'Missing or invalid authorization header' });
     return;
   }
 
-  const token = authHeader.slice(7);
   try {
     const payload = verifyToken(token);
     req.user = payload;

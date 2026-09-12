@@ -11,15 +11,27 @@ const nextConfig = {
   },
   // Enable source maps for better Sentry error stacks
   productionBrowserSourceMaps: true,
-  // Allow cross-origin requests for Sentry
+  // Security headers
   async headers() {
     return [
       {
         source: '/:path*',
         headers: [
           {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Access-Control-Allow-Methods',
@@ -27,7 +39,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Request-ID, X-Correlation-ID',
+            value: 'Content-Type, Authorization, X-Crosssell-Token, X-Request-ID, X-Correlation-ID',
           },
         ],
       },

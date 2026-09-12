@@ -5,6 +5,7 @@
  * Run with: npm run dev (port 4000)
  */
 
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
@@ -13,6 +14,8 @@ import logger, { requestLogger, responseLogger } from './logger';
 
 import { metricsHandler, metricsMiddleware } from './metrics';
 import { authMiddleware } from './middleware/auth';
+import { csrfProtection } from './middleware/csrf';
+import { apiRateLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/auth';
 import bookingRoutes from './routes/bookings';
 import cleaningRoutes from './routes/cleaning';
@@ -33,20 +36,59 @@ const PORT = process.env.PORT || 4000;
 app.use(sentryRequestHandler);
 
 // Middleware
-app.use(helmet());
+app.use(
+  helmet({
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  }),
+);
 app.use(
   cors({
     origin: process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',')
       : ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true, // Required for cookies to work cross-origin
   }),
 );
+app.use(cookieParser());
 app.use(express.json());
 app.use(requestLogger);
 app.use(responseLogger);
 
 // Collect metrics before handling routes
 app.use(metricsMiddleware);
+
+// Rate limiting — general API protection
+app.use(apiRateLimiter);
+
+// CSRF protection for state-changing requests on /api routes
+// Auth login/register/logout exempt from CSRF (they establish the token)
+app.use('/api', (req, res, next) => {
+  const url = req.originalUrl;
+  if (
+    ['/api/v1/auth/login', '/api/v1/auth/register', '/api/v1/auth/logout'].some((p) =>
+      url.startsWith(p),
+    )
+  ) {
+    return next();
+  }
+  csrfProtection(req, res, next);
+});
 
 // Health check endpoint
 app.get('/health', (_req, res) => {
